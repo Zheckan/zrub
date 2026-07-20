@@ -24,6 +24,7 @@
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "package:check": "node scripts/verify-package-contents.mjs",
     "prepack": "pnpm run build"
   },
   "dependencies": {
