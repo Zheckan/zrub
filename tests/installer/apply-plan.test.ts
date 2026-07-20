@@ -3,16 +3,55 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import type {
+  LoadedResource,
+  LoadedResourceFile,
+  ResourceKind,
+} from '../../src/catalog/types.js';
 import {
   applyInstallationPlan,
   type FileWriter,
 } from '../../src/installer/apply-plan.js';
+import { wrapManagedBlock } from '../../src/installer/managed-block.js';
+import { planInstallation } from '../../src/installer/plan-installation.js';
 import type {
   InstallationOperation,
   InstallationOperationKind,
   InstallationPlan,
 } from '../../src/installer/types.js';
 import { withTempDirectory } from '../helpers/temp-project.js';
+
+async function loadedResource(
+  directory: string,
+  options: {
+    id: string;
+    kind: ResourceKind;
+    content: string;
+    destination: string;
+    managed?: boolean;
+  },
+): Promise<LoadedResource> {
+  const resourceDirectory = path.join(directory, 'catalog', options.id);
+  const sourcePath = path.join(resourceDirectory, 'payload.md');
+  await mkdir(resourceDirectory, { recursive: true });
+  await writeFile(sourcePath, options.content);
+  const file: LoadedResourceFile = {
+    source: 'payload.md',
+    sourcePath,
+    destination: options.destination,
+    ...(options.managed ? { onExisting: 'managed-prepend-once' as const } : {}),
+  };
+
+  return {
+    schemaVersion: 1,
+    id: options.id,
+    name: options.id,
+    description: options.id,
+    kind: options.kind,
+    directoryPath: resourceDirectory,
+    files: [file],
+  };
+}
 
 function operation(
   targetRoot: string,
@@ -164,6 +203,118 @@ describe('applyInstallationPlan', () => {
         failed: create,
       });
       expect(await readdir(targetRoot)).toEqual(['conflict.md']);
+    });
+  });
+});
+
+describe('planner and executor lifecycle', () => {
+  it('installs a standalone guide into missing nested directories', async () => {
+    await withTempDirectory(async (directory) => {
+      const targetRoot = path.join(directory, 'target');
+      await mkdir(targetRoot);
+      const resource = await loadedResource(directory, {
+        id: 'frontend-project-structure',
+        kind: 'guide',
+        content: '# Frontend guide\n',
+        destination: 'docs/project-guides/frontend-project-structure.md',
+      });
+
+      const installationPlan = await planInstallation([resource], targetRoot);
+      const result = await applyInstallationPlan(installationPlan);
+
+      expect(result.status).toBe('completed');
+      await expect(
+        readFile(
+          path.join(
+            targetRoot,
+            'docs/project-guides/frontend-project-structure.md',
+          ),
+          'utf8',
+        ),
+      ).resolves.toBe('# Frontend guide\n');
+    });
+  });
+
+  it('prepends an agent guide while preserving existing content below it', async () => {
+    await withTempDirectory(async (directory) => {
+      const targetRoot = path.join(directory, 'target');
+      await mkdir(targetRoot);
+      const destinationPath = path.join(targetRoot, 'AGENTS.md');
+      await writeFile(destinationPath, '# Existing instructions\n');
+      const resource = await loadedResource(directory, {
+        id: 'agents-project-guide',
+        kind: 'template',
+        content: '## Findings\n',
+        destination: 'AGENTS.md',
+        managed: true,
+      });
+
+      const installationPlan = await planInstallation([resource], targetRoot);
+      await applyInstallationPlan(installationPlan);
+
+      expect(await readFile(destinationPath, 'utf8')).toBe(
+        `${wrapManagedBlock(
+          'agents-project-guide',
+          '## Findings\n',
+        )}\n# Existing instructions\n`,
+      );
+    });
+  });
+
+  it('preserves edits inside an installed agent block on rerun', async () => {
+    await withTempDirectory(async (directory) => {
+      const targetRoot = path.join(directory, 'target');
+      await mkdir(targetRoot);
+      const destinationPath = path.join(targetRoot, 'AGENTS.md');
+      const resource = await loadedResource(directory, {
+        id: 'agents-project-guide',
+        kind: 'template',
+        content: 'Original findings\n',
+        destination: 'AGENTS.md',
+        managed: true,
+      });
+      await applyInstallationPlan(
+        await planInstallation([resource], targetRoot),
+      );
+      const edited = (await readFile(destinationPath, 'utf8')).replace(
+        'Original findings',
+        'User-edited findings',
+      );
+      await writeFile(destinationPath, edited);
+
+      const rerunPlan = await planInstallation([resource], targetRoot);
+      const rerunResult = await applyInstallationPlan(rerunPlan);
+
+      expect(rerunPlan.operations[0]?.kind).toBe('already-installed');
+      expect(rerunResult).toEqual({ status: 'completed', completed: [] });
+      expect(await readFile(destinationPath, 'utf8')).toBe(edited);
+    });
+  });
+
+  it('does not replace standalone conflicting content until the plan is applied', async () => {
+    await withTempDirectory(async (directory) => {
+      const targetRoot = path.join(directory, 'target');
+      await mkdir(path.join(targetRoot, 'docs'), { recursive: true });
+      const destinationPath = path.join(targetRoot, 'docs/guide.md');
+      await writeFile(destinationPath, 'Existing content\n');
+      const resource = await loadedResource(directory, {
+        id: 'replacement-guide',
+        kind: 'guide',
+        content: 'Replacement content\n',
+        destination: 'docs/guide.md',
+      });
+
+      const installationPlan = await planInstallation([resource], targetRoot);
+
+      expect(installationPlan.operations[0]?.kind).toBe('replace-conflict');
+      expect(await readFile(destinationPath, 'utf8')).toBe(
+        'Existing content\n',
+      );
+
+      await applyInstallationPlan(installationPlan);
+      expect(await readFile(destinationPath, 'utf8')).toBe(
+        'Replacement content\n',
+      );
     });
   });
 });
