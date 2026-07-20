@@ -6,7 +6,7 @@
 
 **Architecture:** A catalog module validates bundled resource metadata, a side-effect-free planner classifies all target filesystem operations, an executor applies only an approved plan, and a thin CLI coordinates terminal interaction through an injected prompt interface. Implementation is delivered as six GitHub stacked-PR layers, with cohesive passing commits inside every layer.
 
-**Tech Stack:** Node.js >=22, TypeScript ESM, pnpm 11.15.1, `@clack/prompts` 1.7.0, Vitest, Prettier, GitHub Actions, and `github/gh-stack` 0.0.8.
+**Tech Stack:** Node.js >=22, TypeScript ESM, pnpm 11.15.1, `@clack/prompts` 1.7.0, Vitest, Prettier, GitHub Actions, Git branches, and ordinary GitHub PRs.
 
 ## Global Constraints
 
@@ -76,35 +76,28 @@ docs/superpowers/plans/2026-07-20-project-blueprints-cli.md
 
 This is bootstrap work, not a product PR layer.
 
-- [ ] **Step 1: Verify the authenticated account, private remote, and stack extension**
+- [ ] **Step 1: Verify the authenticated account and private remote**
 
 Run outside the restricted network sandbox:
 
 ```sh
 gh auth status
 gh repo view Zheckan/project-blueprints --json nameWithOwner,visibility,url
-gh stack --version
-gh stack init --help
-gh stack add --help
-gh stack push --help
-gh stack submit --help
 ```
 
-Expected: authenticated as `Zheckan`; repository visibility is `PRIVATE`; all four stack commands are available. If GitHub reports that stacked PRs are not enabled for this repository, stop and ask the user rather than switching workflows.
+Expected: authenticated as `Zheckan` and repository visibility is `PRIVATE`.
 
-- [ ] **Step 2: Initialize the local repository and empty trunk**
+- [ ] **Step 2: Start the foundation branch from the existing trunk**
 
 Run:
 
 ```sh
-git init -b main
-git remote add origin git@github.com:Zheckan/project-blueprints.git
-git commit --allow-empty -m "chore: initialize repository"
-git push -u origin main
-gh stack init foundation
+git switch main
+git pull --ff-only
+git switch -c foundation
 ```
 
-Expected: `main` contains only the empty initialization commit; current branch is the first stack layer named `foundation`; the existing spec and plan remain untracked until the foundation documentation commit.
+Expected: current branch is `foundation`, based on the existing clean `main` branch.
 
 ## Stage 1: Repository and Package Foundation — `foundation`
 
@@ -309,8 +302,8 @@ Expected: all commands exit 0.
 ```sh
 git add .github/workflows/ci.yml
 git commit -m "ci: verify supported Node versions"
-gh stack push
-gh stack submit
+git push -u origin foundation
+gh pr create --base main --head foundation --title "chore: establish project foundation"
 ```
 
 Expected: a `foundation` PR targets `main` and contains three cohesive commits. Record its URL before starting Stage 2.
@@ -320,7 +313,7 @@ Expected: a `foundation` PR targets `main` and contains three cohesive commits. 
 Start the layer:
 
 ```sh
-gh stack add resource-catalog
+git switch -c resource-catalog
 ```
 
 ### Task 4: Define and validate resource metadata
@@ -578,8 +571,8 @@ pnpm format:check
 pnpm typecheck
 pnpm test
 pnpm build
-gh stack push
-gh stack submit
+git push -u origin resource-catalog
+gh pr create --base foundation --head resource-catalog --title "feat: add resource catalog"
 ```
 
 Expected: all checks pass and `resource-catalog` is a stacked PR based on `foundation`.
@@ -589,7 +582,7 @@ Expected: all checks pass and `resource-catalog` is a stacked PR based on `found
 Start the layer:
 
 ```sh
-gh stack add installation-planner
+git switch -c installation-planner
 ```
 
 ### Task 7: Resolve destinations and reject unsafe paths
@@ -779,8 +772,8 @@ pnpm format:check
 pnpm typecheck
 pnpm test
 pnpm build
-gh stack push
-gh stack submit
+git push -u origin installation-planner
+gh pr create --base resource-catalog --head installation-planner --title "feat: plan resource installations"
 ```
 
 Expected: `installation-planner` is a passing stacked PR based on `resource-catalog`.
@@ -790,7 +783,7 @@ Expected: `installation-planner` is a passing stacked PR based on `resource-cata
 Start the layer:
 
 ```sh
-gh stack add plan-executor
+git switch -c plan-executor
 ```
 
 ### Task 10: Apply approved write operations atomically per file
@@ -905,8 +898,8 @@ pnpm format:check
 pnpm typecheck
 pnpm test
 pnpm build
-gh stack push
-gh stack submit
+git push -u origin plan-executor
+gh pr create --base installation-planner --head plan-executor --title "feat: execute installation plans safely"
 ```
 
 Expected: `plan-executor` is a passing stacked PR based on `installation-planner`.
@@ -916,7 +909,7 @@ Expected: `plan-executor` is a passing stacked PR based on `installation-planner
 Start the layer:
 
 ```sh
-gh stack add interactive-cli
+git switch -c interactive-cli
 ```
 
 ### Task 12: Define the terminal seam and grouped review formatter
@@ -1148,8 +1141,8 @@ Expected: all pass; `dist/cli.js` begins with the Node shebang and resolves bund
 ```sh
 git add src/cli.ts src/cli/clack-ui.ts tests/cli/clack-ui.test.ts
 git commit -m "feat: add interactive Clack CLI"
-gh stack push
-gh stack submit
+git push -u origin interactive-cli
+gh pr create --base plan-executor --head interactive-cli --title "feat: add interactive installer CLI"
 ```
 
 Expected: `interactive-cli` is a passing stacked PR based on `plan-executor`.
@@ -1159,7 +1152,7 @@ Expected: `interactive-cli` is a passing stacked PR based on `plan-executor`.
 Start the layer:
 
 ```sh
-gh stack add package-verification
+git switch -c package-verification
 ```
 
 ### Task 15: Verify the npm tarball allowlist
@@ -1384,9 +1377,9 @@ If `AGENTS.md` did not receive a genuine verified finding, omit it from `git add
 - [ ] **Step 5: Submit and inspect the complete stack**
 
 ```sh
-gh stack push
-gh stack submit
-gh stack view
+git push -u origin package-verification
+gh pr create --base interactive-cli --head package-verification --title "test: verify package distribution"
+gh pr list --state open --json number,title,headRefName,baseRefName,url
 git status --short --branch
 ```
 

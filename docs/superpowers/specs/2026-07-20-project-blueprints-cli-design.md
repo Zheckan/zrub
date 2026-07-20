@@ -425,34 +425,27 @@ contains commits at every meaningful, independently understandable change.
 
 ### Stacked-PR delivery contract
 
-- Use GitHub's `github/gh-stack` CLI extension and its `gh stack` command. The
-  optional `gs` alias may be configured, but instructions and automation must
-  not depend on the alias existing.
-- Before implementation, verify that GitHub's stacked-PR private preview is
-  enabled for the repository and that the installed extension exposes the
-  expected `init`, `add`, `push`, and `submit` commands. If the feature is not
-  enabled, stop and request direction instead of silently switching workflows.
-- Create and push an empty initialization commit on `main` only when required
-  to give the new remote repository a stable base branch. No product or
-  configuration change goes directly to `main`.
-- Start Stage 1 with `gh stack init foundation`.
-- Start each later stage from the preceding layer with:
-  - Stage 2: `gh stack add resource-catalog`
-  - Stage 3: `gh stack add installation-planner`
-  - Stage 4: `gh stack add plan-executor`
-  - Stage 5: `gh stack add interactive-cli`
-  - Stage 6: `gh stack add package-verification`
+- Use ordinary Git branches and `gh pr create`; GitHub's private-preview stack
+  feature is not required.
+- Start Stage 1 on `foundation`, branched from `main`.
+- Start each later branch from the preceding branch:
+  - Stage 2: `resource-catalog` from `foundation`
+  - Stage 3: `installation-planner` from `resource-catalog`
+  - Stage 4: `plan-executor` from `installation-planner`
+  - Stage 5: `interactive-cli` from `plan-executor`
+  - Stage 6: `package-verification` from `interactive-cli`
 - At the end of every stage, run that layer's focused verification plus all
-  tests inherited from lower layers. Then use `gh stack push` and
-  `gh stack submit` so the stage has its own PR based on the preceding layer.
+  tests inherited from lower layers. Push the branch and create a normal PR
+  whose base is the preceding branch, producing the same focused stacked
+  diffs.
 - Keep each commit cohesive and passing. A meaningful change includes its
   focused tests in the same commit; do not accumulate an entire stage into one
   large commit, and do not create mechanical checkpoint commits with no
   reviewable purpose.
 - PR descriptions state the stage goal, summarize commits, list verification
   evidence, and identify the previous and next stack layers.
-- Do not merge any layer during implementation. The completed stack is handed
-  to the user for review and merge through GitHub's stacked-PR interface.
+- Do not merge any layer during implementation. The completed chain of normal
+  PRs is handed to the user for review from bottom to top.
 
 ### Stage 1: Repository and package foundation
 
