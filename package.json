@@ -25,7 +25,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "package:check": "node scripts/verify-package-contents.mjs",
-    "prepack": "pnpm run build"
+    "prepack": "pnpm run build",
+    "smoke:launchers": "node scripts/smoke-packed-cli.mjs"
   },
   "dependencies": {
     "@clack/prompts": "1.7.0"

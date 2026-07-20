@@ -45,3 +45,37 @@ jobs:
 
       - name: Verify packed package contents
         run: pnpm package:check
+
+  launcher-smoke:
+    name: Packed launcher smoke
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.15.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify pinned Yarn
+        run: pnpm exec yarn --version
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Smoke-test packed launchers
+        run: pnpm smoke:launchers
