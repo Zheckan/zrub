@@ -4,7 +4,7 @@ import { bundledResourcesRoot } from '../../src/catalog/bundled-root.js';
 import { loadCatalog } from '../../src/catalog/load-catalog.js';
 
 describe('bundled catalog', () => {
-  it('contains the frontend project structure guide', async () => {
+  it('contains the two initial resources', async () => {
     const resources = await loadCatalog(bundledResourcesRoot());
 
     expect(
@@ -18,6 +18,17 @@ describe('bundled catalog', () => {
         })),
       })),
     ).toEqual([
+      {
+        id: 'agents-project-guide',
+        kind: 'template',
+        files: [
+          {
+            source: 'AGENTS.md',
+            destination: './',
+            onExisting: 'managed-prepend-once',
+          },
+        ],
+      },
       {
         id: 'frontend-project-structure',
         kind: 'guide',
