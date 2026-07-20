@@ -13,11 +13,20 @@ blueprints. It can contain engineering guides, prompts, editable templates,
 examples, and code. The general term for an installable catalog entry is
 **resource**.
 
-The MVP is invoked from the target project's root directory with:
+The published npm package is launcher-agnostic. It can be invoked from the
+target project's root directory with any of these equivalent commands:
 
 ```sh
 npx project-blueprints@latest
+pnpm dlx project-blueprints@latest
+yarn dlx project-blueprints@latest
+bunx project-blueprints@latest
 ```
+
+`yarn dlx` means a modern Yarn release that provides the `dlx` command; Yarn
+Classic 1.x is not supported by that invocation. `bunx` respects the package's
+`#!/usr/bin/env node` shebang by default, so Node.js `>=22` remains a runtime
+requirement when launching through Bun.
 
 It presents an interactive resource selection, previews every filesystem
 operation, asks for one confirmation, and then installs the approved resources
@@ -60,7 +69,7 @@ project-blueprints/
   README.md
   LICENSE
   package.json
-  package-lock.json
+  pnpm-lock.yaml
   tsconfig.json
   vitest.config.ts
 
@@ -353,7 +362,10 @@ documentation, not the installable template. It contains:
 - Package and repository name: `project-blueprints`.
 - Runtime: Node.js `>=22`.
 - Language and module format: TypeScript with native ESM.
-- Package manager and registry: npm.
+- Development package manager: pnpm 11.15.1, pinned through the `packageManager`
+  field and `pnpm-lock.yaml`. Contributors use pnpm for dependency and script
+  workflows.
+- Publication registry: npm.
 - Interactive prompts: `@clack/prompts`.
 - Compilation: `tsc`; the MVP does not need a bundler.
 - Tests: Vitest.
@@ -364,12 +376,14 @@ documentation, not the installable template. It contains:
   and package metadata. Development sources, tests, fixtures, and internal docs
   are not published unless required for license or package operation.
 - The executable entry uses the `package.json` `bin` field and includes a Node
-  shebang so `npx project-blueprints@latest` launches the interactive CLI.
+  shebang so npm, pnpm, modern Yarn, and Bun package launchers all start the
+  same Node.js CLI.
 
 As verified on 2026-07-20, Node 22 and Node 24 are supported LTS releases,
-`@clack/prompts` 1.7.0 supports Node `>=20.12.0`, and the npm registry returned
-`E404` for `project-blueprints`. Package-name availability is not reserved and
-must be checked again immediately before publication.
+`@clack/prompts` 1.7.0 supports Node `>=20.12.0`, pnpm 11.15.1 requires Node
+`>=22.13`, and the npm registry returned `E404` for `project-blueprints`.
+Package-name availability is not reserved and must be checked again immediately
+before publication.
 
 ## Testing and Release Verification
 
@@ -394,11 +408,12 @@ Release verification includes:
 - Prettier format checking.
 - Type checking and compilation.
 - The full Vitest suite.
-- `npm pack --dry-run --json` inspection to verify the publish allowlist.
-- Packing the real tarball and invoking it from a separate temporary target
-  project to verify executable wiring and bundled-resource lookup.
+- `pnpm pack --dry-run --json` inspection to verify the publish allowlist.
+- Packing the real tarball and invoking it through npx, `pnpm dlx`, modern
+  `yarn dlx`, and bunx from separate temporary target projects to verify
+  executable wiring, Node-shebang behavior, and bundled-resource lookup.
 - GitHub Actions on Node 22 and Node 24 running the build, tests, and package
-  verification.
+  verification. CI installs dependencies with pnpm and the frozen lockfile.
 
 ## Implementation Stages
 
@@ -441,8 +456,8 @@ contains commits at every meaningful, independently understandable change.
 ### Stage 1: Repository and package foundation
 
 - Initialize the Git repository and npm package.
-- Configure TypeScript ESM, Node `>=22`, Vitest, Prettier, package scripts, the
-  executable `bin` entry, and the npm publish allowlist.
+- Configure TypeScript ESM, Node `>=22`, pnpm 11.15.1, Vitest, Prettier, package
+  scripts, the executable `bin` entry, and the npm publish allowlist.
 - Add the repository README, MIT license, real root `AGENTS.md`, and initial CI
   workflow.
 - Prove the empty CLI entry builds and launches from compiled output.
@@ -501,8 +516,9 @@ contains commits at every meaningful, independently understandable change.
 ### Stage 6: Package and release verification
 
 - Run the Prettier format check, type checking, build, and the full test suite.
-- Inspect `npm pack --dry-run --json` and correct the package allowlist.
-- Build a real tarball and run the CLI from a separate temporary target project.
+- Inspect `pnpm pack --dry-run --json` and correct the package allowlist.
+- Build a real tarball and run it through npx, `pnpm dlx`, modern `yarn dlx`,
+  and bunx from separate temporary target projects.
 - Verify both initial resource installations and the editable `AGENTS.md`
   rerun behavior through the packed artifact.
 - Confirm CI covers Node 22 and Node 24.
@@ -534,8 +550,12 @@ interface is introduced.
 
 The MVP is complete when:
 
-1. `npx project-blueprints@latest` opens an interactive checkbox selection from
-   a packed and installed package.
+1. Each supported launcher opens the same interactive checkbox selection from
+   the published package:
+   - `npx project-blueprints@latest`
+   - `pnpm dlx project-blueprints@latest`
+   - `yarn dlx project-blueprints@latest` with modern Yarn
+   - `bunx project-blueprints@latest`
 2. The two bundled resources appear with correct labels and descriptions.
 3. The planner displays the entire filesystem effect before any write.
 4. One confirmation approves or declines the whole displayed plan.
@@ -554,5 +574,5 @@ The MVP is complete when:
     catalog metadata fail safely.
 12. The npm tarball contains the runtime and resources but excludes development
     artifacts.
-13. Tests, build, package inspection, packed CLI smoke test, and CI all pass on
-    the supported Node versions.
+13. Tests, build, package inspection, all four launcher smoke tests, and CI pass
+    on the supported Node versions.
