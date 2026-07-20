@@ -22,3 +22,15 @@ export interface InstallationPlan {
   hasReplacementConflicts: boolean;
   hasBlockingConflicts: boolean;
 }
+
+export type ExecutionResult =
+  | {
+      status: 'completed';
+      completed: InstallationOperation[];
+    }
+  | {
+      status: 'failed';
+      completed: InstallationOperation[];
+      failed: InstallationOperation;
+      error: Error;
+    };
