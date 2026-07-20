@@ -5,8 +5,7 @@ guides, prompts, templates, examples, and code into new or existing projects.
 
 > The package is under development and has not been published to npm yet.
 
-After publication, run it from a target project's root with Node.js 22 or
-newer:
+After publication, run one of these commands from the target project's root:
 
 ```sh
 npx project-blueprints@latest
@@ -15,22 +14,56 @@ yarn dlx project-blueprints@latest
 bunx project-blueprints@latest
 ```
 
-`yarn dlx` requires modern Yarn rather than Yarn Classic 1.x. `bunx` respects
-the CLI's Node shebang, so Node.js remains required.
+Node.js 22 or newer is required. `yarn dlx` requires modern Yarn rather than
+Yarn Classic 1.x. `bunx` invokes the package's Node shebang, so Node.js remains
+required when launching through Bun.
+
+## Included resources
+
+- **Agent project guide** installs a managed, editable section at the top of
+  `AGENTS.md`. It provides a project overview, important conventions,
+  verification commands, and a shared Findings section. Existing content stays
+  below the inserted section.
+- **Frontend project structure** installs
+  `docs/project-guides/frontend-project-structure.md`, a React guide organized
+  around thin pages, feature-owned product logic, reusable domain logic, and a
+  shared UI layer.
+
+The catalog can later include guides, prompts, templates, examples, and code.
+
+## Installation behavior
 
 The CLI will:
 
 1. Show the bundled resources in a checkbox menu.
 2. Plan every filesystem operation without writing anything.
-3. Show one complete review, including replacement conflicts.
+3. Show one grouped review of creates, prepends, unchanged files, and conflicts.
 4. Ask for one confirmation.
 5. Apply the approved plan and summarize the result.
+
+Existing unmanaged files are never replaced silently: the review marks each
+replacement as a conflict and the CLI warns before the single confirmation.
+Malformed managed markers block installation instead of guessing how to edit
+the file.
+
+The `AGENTS.md` template uses stable managed markers. The first run creates or
+prepends the section; later runs recognize it and preserve everything inside it
+byte-for-byte, including project notes and Findings written by agents. The CLI
+reviews every write before asking for approval, and cancellation or an empty
+selection makes no changes.
 
 ## Resource catalog
 
 Publishable resources live in `resources/`. A resource is a self-contained
-folder with `resource.json` metadata and one or more payload files. Supported
-kinds are guides, prompts, templates, examples, and code.
+folder with `resource.json` metadata and one or more payload files. To add one:
+
+1. Create `resources/<resource-id>/`.
+2. Add a `resource.json` with schema version `1`, a unique ID, name,
+   description, kind, and at least one file mapping.
+3. Put every referenced payload inside the same resource directory.
+4. Choose an exact file destination or a directory destination ending in `/`.
+5. Run the verification commands below. Catalog tests reject invalid metadata,
+   duplicate IDs, missing payloads, and payload paths that escape the resource.
 
 Documentation about developing this repository belongs in `docs/`, not in the
 publishable catalog.
@@ -45,6 +78,15 @@ pnpm format:check
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm package:check
+pnpm smoke:launchers
 ```
 
-The package is not published as part of normal development or CI.
+`pnpm package:check` builds a real npm tarball and validates its allowlisted
+contents. `pnpm smoke:launchers` packs the CLI and runs it through npx, pnpm
+dlx, the repository-pinned Yarn 4.17.1, and bunx 1.3.14. The launcher smoke
+requires those package managers to resolve dependencies from their registries.
+
+The package is not published as part of normal development or CI. A persistent
+installation manifest and `list`, `update`, or `remove` workflows are deferred;
+the first release provides the interactive installer only.

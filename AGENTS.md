@@ -22,3 +22,9 @@ live in `resources/`; documentation about developing this repository lives in
 Record concise, verified, project-wide surprises, recurring sources of
 confusion, and non-obvious constraints here. Do not use this section as a work
 log. Never record secrets. Correct or remove stale findings.
+
+- Clack's multiselect treats carriage return (`\r`) as the Enter key in piped
+  launcher smoke tests; a newline (`\n`) leaves the top-level prompt unsettled.
+- To smoke-test an npm tarball, npx must receive it through `--package` followed
+  by the bin name. Passing the tarball as npx's positional command attempts to
+  execute the archive itself.
