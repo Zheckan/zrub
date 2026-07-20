@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "frontend-project-structure",
+  "name": "Frontend project structure",
+  "description": "A React structure built around thin pages, feature-owned product logic, reusable domain logic, and a shared UI layer.",
+  "kind": "guide",
+  "files": [
+    {
+      "source": "frontend-project-structure.md",
+      "destination": "docs/project-guides/frontend-project-structure.md"
+    }
+  ]
+}
