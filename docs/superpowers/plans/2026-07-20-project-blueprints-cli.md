@@ -111,6 +111,7 @@ Expected: `main` contains only the empty initialization commit; current branch i
 ### Task 1: Configure pnpm, TypeScript, tests, formatting, and the executable
 
 **Files:**
+
 - Create: `package.json`
 - Create: `pnpm-lock.yaml`
 - Create: `tsconfig.json`
@@ -122,6 +123,7 @@ Expected: `main` contains only the empty initialization commit; current branch i
 - Create: `src/cli.ts`
 
 **Interfaces:**
+
 - Produces: executable `dist/cli.js` selected by `package.json#bin.project-blueprints`.
 - Produces: repository commands `pnpm build`, `pnpm typecheck`, `pnpm test`, `pnpm format`, and `pnpm format:check`.
 
@@ -215,6 +217,7 @@ git commit -m "chore: configure TypeScript CLI package"
 ### Task 2: Add repository documentation and agent guidance
 
 **Files:**
+
 - Create: `README.md`
 - Create: `AGENTS.md`
 - Create: `LICENSE`
@@ -222,6 +225,7 @@ git commit -m "chore: configure TypeScript CLI package"
 - Add: `docs/superpowers/plans/2026-07-20-project-blueprints-cli.md`
 
 **Interfaces:**
+
 - Produces: contributor instructions based exclusively on pnpm.
 - Produces: root `AGENTS.md` with an editable `Findings` knowledge section.
 
@@ -276,9 +280,11 @@ git commit -m "docs: define project and implementation guidance"
 ### Task 3: Add the initial CI workflow
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 **Interfaces:**
+
 - Consumes: pnpm scripts from Task 1.
 - Produces: Node 22 and Node 24 verification on pushes and pull requests.
 
@@ -320,11 +326,13 @@ gh stack add resource-catalog
 ### Task 4: Define and validate resource metadata
 
 **Files:**
+
 - Create: `src/catalog/types.ts`
 - Create: `src/catalog/validate-resource.ts`
 - Create: `tests/catalog/validate-resource.test.ts`
 
 **Interfaces:**
+
 - Produces: `validateResourceDefinition(input: unknown): ResourceDefinition`.
 - Produces: `ResourceDefinition`, `ResourceFileDefinition`, `ResourceKind`, `ExistingFilePolicy`, `LoadedResource`, and `LoadedResourceFile`.
 
@@ -411,12 +419,14 @@ Expected: focused test and typecheck pass.
 ### Task 5: Load resources and resolve the bundled catalog
 
 **Files:**
+
 - Create: `src/catalog/load-catalog.ts`
 - Create: `src/catalog/bundled-root.ts`
 - Create: `tests/catalog/load-catalog.test.ts`
 - Create: `tests/helpers/temp-project.ts`
 
 **Interfaces:**
+
 - Consumes: `validateResourceDefinition` and catalog types.
 - Produces: `loadCatalog(resourcesRoot: string): Promise<LoadedResource[]>`.
 - Produces: `bundledResourcesRoot(metaUrl?: string): string`.
@@ -464,6 +474,7 @@ git commit -m "feat: load bundled resource catalog"
 ### Task 6: Add the two initial resources
 
 **Files:**
+
 - Create: `resources/frontend-project-structure/resource.json`
 - Create: `resources/frontend-project-structure/frontend-project-structure.md`
 - Create: `resources/agents-project-guide/resource.json`
@@ -471,6 +482,7 @@ git commit -m "feat: load bundled resource catalog"
 - Create: `tests/catalog/bundled-catalog.test.ts`
 
 **Interfaces:**
+
 - Produces: the complete MVP catalog consumed by the CLI.
 
 - [ ] **Step 1: Write the failing bundled-catalog acceptance test**
@@ -583,10 +595,12 @@ gh stack add installation-planner
 ### Task 7: Resolve destinations and reject unsafe paths
 
 **Files:**
+
 - Create: `src/installer/destination.ts`
 - Create: `tests/installer/destination.test.ts`
 
 **Interfaces:**
+
 - Produces: `resolveDestination(targetRoot: string, file: LoadedResourceFile): string`.
 - Produces: `assertSafeDestination(targetRoot: string, destinationPath: string): Promise<void>`.
 
@@ -608,8 +622,14 @@ Directory destinations are detected by a trailing `/` and append `basename(file.
 
 ```ts
 const relative = path.relative(resolvedTargetRoot, resolvedDestination);
-if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
-  throw new Error(`Unsafe destination outside target project: ${file.destination}`);
+if (
+  relative === '..' ||
+  relative.startsWith(`..${path.sep}`) ||
+  path.isAbsolute(relative)
+) {
+  throw new Error(
+    `Unsafe destination outside target project: ${file.destination}`,
+  );
 }
 ```
 
@@ -627,10 +647,12 @@ git commit -m "feat: validate installation destinations"
 ### Task 8: Generate and inspect one-time managed blocks
 
 **Files:**
+
 - Create: `src/installer/managed-block.ts`
 - Create: `tests/installer/managed-block.test.ts`
 
 **Interfaces:**
+
 - Produces: `managedMarkers(resourceId: string): { start: string; end: string }`.
 - Produces: `wrapManagedBlock(resourceId: string, content: string): string`.
 - Produces: `inspectManagedBlock(resourceId: string, content: string): ManagedBlockState`.
@@ -681,11 +703,13 @@ git commit -m "feat: detect managed resource blocks"
 ### Task 9: Build complete installation plans without writes
 
 **Files:**
+
 - Create: `src/installer/types.ts`
 - Create: `src/installer/plan-installation.ts`
 - Create: `tests/installer/plan-installation.test.ts`
 
 **Interfaces:**
+
 - Consumes: loaded resources, destination safety, and managed-block helpers.
 - Produces: `planInstallation(resources: LoadedResource[], targetRoot: string): Promise<InstallationPlan>`.
 - Produces: plan and operation types consumed unchanged by the executor and CLI.
@@ -772,10 +796,12 @@ gh stack add plan-executor
 ### Task 10: Apply approved write operations atomically per file
 
 **Files:**
+
 - Create: `src/installer/apply-plan.ts`
 - Create: `tests/installer/apply-plan.test.ts`
 
 **Interfaces:**
+
 - Consumes: `InstallationPlan` from Stage 3.
 - Produces: `applyInstallationPlan(plan: InstallationPlan): Promise<ExecutionResult>`.
 - Produces: `ExecutionResult` with status, completed operations, optional failed operation, and error.
@@ -845,9 +871,11 @@ git commit -m "feat: apply approved installation plans"
 ### Task 11: Verify the planner-executor acceptance path
 
 **Files:**
+
 - Modify: `tests/installer/apply-plan.test.ts`
 
 **Interfaces:**
+
 - Consumes: real planner and executor together.
 - Produces: regression coverage for the target-project behavior users receive.
 
@@ -894,11 +922,13 @@ gh stack add interactive-cli
 ### Task 12: Define the terminal seam and grouped review formatter
 
 **Files:**
+
 - Create: `src/cli/ui.ts`
 - Create: `src/cli/format-review.ts`
 - Create: `tests/cli/format-review.test.ts`
 
 **Interfaces:**
+
 - Produces: `CANCELLED` token and `UiPort` interface.
 - Produces: `formatPlanReview(plan: InstallationPlan, targetRoot: string): ReviewGroup[]`.
 
@@ -942,7 +972,7 @@ Build a plan containing every operation kind. Assert deterministic group order:
   'UNCHANGED',
   'ALREADY INSTALLED',
   'MALFORMED MARKERS - BLOCKING',
-]
+];
 ```
 
 Entries must use target-root-relative paths with forward slashes and include the resource ID. Empty groups are omitted. Replacement is `warning`; malformed markers is `blocking`; all others are `normal`.
@@ -974,10 +1004,12 @@ git commit -m "feat: format installation plan reviews"
 ### Task 13: Orchestrate the complete CLI through injected modules
 
 **Files:**
+
 - Create: `src/cli/run-cli.ts`
 - Create: `tests/cli/run-cli.test.ts`
 
 **Interfaces:**
+
 - Consumes: `UiPort`, catalog loader, planner, and executor.
 - Produces: `runCli(dependencies: CliDependencies): Promise<number>` where the number is the process exit code.
 
@@ -1042,11 +1074,13 @@ git commit -m "feat: orchestrate interactive installations"
 ### Task 14: Implement the Clack adapter and executable entry
 
 **Files:**
+
 - Create: `src/cli/clack-ui.ts`
 - Modify: `src/cli.ts`
 - Create: `tests/cli/clack-ui.test.ts`
 
 **Interfaces:**
+
 - Consumes: `UiPort` and all default production modules.
 - Produces: real interactive execution from all package launchers.
 
@@ -1131,11 +1165,13 @@ gh stack add package-verification
 ### Task 15: Verify the npm tarball allowlist
 
 **Files:**
+
 - Create: `scripts/verify-package-contents.mjs`
 - Modify: `package.json`
 - Modify: `.github/workflows/ci.yml`
 
 **Interfaces:**
+
 - Produces: `pnpm package:check`, which builds a real tarball in a temporary directory, verifies required files, and deletes the temporary directory.
 
 - [ ] **Step 1: Write the failing package verifier**
@@ -1203,11 +1239,13 @@ Expected: all pass.
 ### Task 16: Smoke-test all four package launchers
 
 **Files:**
+
 - Create: `scripts/smoke-packed-cli.mjs`
 - Modify: `package.json`
 - Modify: `.github/workflows/ci.yml`
 
 **Interfaces:**
+
 - Produces: `pnpm smoke:launchers`.
 - Verifies: npx, `pnpm dlx`, Yarn 4.17.1 `dlx`, and bunx 1.3.14 all resolve and execute the same packed Node CLI.
 
@@ -1227,7 +1265,7 @@ The script must:
   ['pnpm', ['dlx', tarballPath]],
   ['yarn', ['dlx', '--package', tarballPath, 'project-blueprints']],
   ['bunx', ['--package', tarballPath, 'project-blueprints']],
-]
+];
 ```
 
 4. For each child, pipe standard input, write one newline to accept an empty multiselect, and close input.
@@ -1287,10 +1325,12 @@ Expected: every command passes.
 ### Task 17: Final release-readiness documentation and stack handoff
 
 **Files:**
+
 - Modify: `README.md`
 - Modify: `AGENTS.md` only if a verified project-wide finding arose during implementation.
 
 **Interfaces:**
+
 - Produces: accurate user commands, prerequisites, conflict behavior, and contributor verification instructions.
 
 - [ ] **Step 1: Update README from observed behavior**

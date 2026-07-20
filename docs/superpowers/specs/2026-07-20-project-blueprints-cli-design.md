@@ -114,9 +114,9 @@ file and one or more payload files.
 The initial metadata shape is:
 
 ```ts
-type ResourceKind = "guide" | "prompt" | "template" | "example" | "code";
+type ResourceKind = 'guide' | 'prompt' | 'template' | 'example' | 'code';
 
-type ExistingFilePolicy = "managed-prepend-once";
+type ExistingFilePolicy = 'managed-prepend-once';
 
 interface ResourceFile {
   source: string;
@@ -216,6 +216,7 @@ The installer generates markers; they are not stored in the payload:
 
 ```md
 <!-- project-blueprints:agents-project-guide:start -->
+
 ...editable installed content...
 <!-- project-blueprints:agents-project-guide:end -->
 ```
