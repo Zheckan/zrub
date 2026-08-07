@@ -53,8 +53,9 @@ The first profile should reproduce this repository configuration:
 - Disable release immutability, Wikis, Sponsorships, and Discussions.
 - Enable Issues, Projects, and Pull requests.
 - Allow squash merging only, using GitHub's default squash commit message.
-- Disable merge commits, rebase merging, update-branch suggestions, and
-  auto-merge.
+- Disable merge commits, rebase merging, and update-branch suggestions.
+- Enable auto-merge so approved pull requests can merge after every ruleset
+  requirement passes.
 - Automatically delete head branches after merge.
 - Do not require signoff for commits made through the GitHub web interface.
 - Allow comments on individual commits.
