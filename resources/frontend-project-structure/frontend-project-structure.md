@@ -124,6 +124,132 @@ else inside the child feature that owns it.
 - When a module needs a replaceable hook or service, pass it explicitly as a
   dependency.
 
+## Feature master hook
+
+Each substantial feature should expose one master hook, conventionally named
+`useFeature`, as the public interface between the feature's logic and its
+presentation.
+
+The master hook:
+
+- Composes the feature's smaller hooks, queries, mutations, route state, and
+  application services.
+- Owns feature-level state, effects, derived data, and event handlers.
+- Converts infrastructure and domain results into values the view can render.
+- Returns an explicit, cohesive result with view state, display data, and
+  callbacks.
+- Hides internal dependencies and implementation details from the container and
+  view.
+
+The container calls the master hook and passes its result to the feature view
+or components through props:
+
+```tsx
+function FeatureContainer() {
+  const feature = useFeature();
+
+  return <FeatureView {...feature} />;
+}
+```
+
+When a feature has multiple top-level states, the container may select the
+appropriate view while still sourcing state and callbacks from the master hook:
+
+```tsx
+function FeatureContainer() {
+  const feature = useFeature();
+
+  if (feature.state.kind === 'guest') {
+    return <GuestView onConnect={feature.onConnect} />;
+  }
+
+  return <FeatureView {...feature} />;
+}
+```
+
+The master hook is an orchestration boundary, not a dumping ground. Delegate:
+
+- Pure calculations and transformations to named functions in `logic/`.
+- API calls and query definitions to data-access modules.
+- Cohesive stateful concerns to smaller specialized hooks.
+- Rendering and interaction markup to views and components.
+
+Presentational views and components consume props supplied by the container.
+They should not call the master hook or duplicate its orchestration. A child
+component may call a hook when that hook belongs to the child, provides reusable
+UI infrastructure, or manages local presentation behavior.
+
+The preferred dependency direction is:
+
+```text
+Container
+   ↓ calls
+Feature master hook
+   ↓ composes
+Specialized hooks / domain logic / data access
+
+Container
+   ↓ passes props
+View
+   ↓ passes focused props
+Components
+```
+
+## Container responsibilities
+
+Containers are composition and orchestration boundaries. They do not need to
+be free of all logic.
+
+Containers may:
+
+- Call feature and application hooks.
+- Connect route or URL state, queries, mutations, and global state.
+- Select a view for states such as guest, loading, error, invalid, ready, and
+  success.
+- Adapt hook results into view props.
+- Define small event handlers that coordinate dependencies already owned by the
+  container.
+- Add wrappers such as suspense boundaries when they belong to the feature
+  entry point.
+
+Containers should not:
+
+- Implement business rules, validation, sorting, filtering, calculations, or
+  substantial data transformations.
+- Contain data-access implementation details.
+- Accumulate enough state and callbacks that the feature workflow becomes hard
+  to understand or test.
+- Push feature-specific hooks into presentational views merely to shorten the
+  container.
+
+When orchestration becomes substantial, extract it into a feature-level hook
+such as `logic/useFeature.ts`. That hook may own data fetching, state, effects,
+derived data, event handlers, and a discriminated view state. The container can
+then call the hook, choose a view when necessary, and pass the result as props.
+
+Do not extract every local function mechanically:
+
+- Keep a small callback in the container when it only wires existing
+  dependencies together and remains easy to read.
+- Move reusable or independently testable pure behavior into a named module in
+  `logic/`.
+- Move cohesive stateful orchestration into a custom hook in `logic/`.
+- Keep query definitions and API calls in a data-access or API module when they
+  can be separated from rendering concerns.
+
+Prefer explicit discriminated states over combinations of optional flags:
+
+```ts
+type FeatureViewState =
+  | { kind: 'invalid'; errors: string[] }
+  | { kind: 'loading' }
+  | { kind: 'error' }
+  | { kind: 'ready'; items: Item[]; total: number };
+```
+
+This lets the container or feature hook map runtime state to one valid view
+state while keeping the view presentational.
+
 ## Unified fix and verification command
 
 Provide a root-level `pnpm fix` command that:
