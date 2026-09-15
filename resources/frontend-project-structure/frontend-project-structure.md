@@ -250,6 +250,38 @@ type FeatureViewState =
 This lets the container or feature hook map runtime state to one valid view
 state while keeping the view presentational.
 
+## Naming conventions
+
+Name files according to their primary responsibility or export:
+
+- React component files use PascalCase and normally match the exported
+  component, for example `FeatureView.tsx` or `FeatureContainer.tsx`.
+- Hook files use camelCase and match the exported hook, for example
+  `useFeature.ts`.
+- Files centered on one function use camelCase and match that function, for
+  example `parseFeatureState.ts`.
+- Generic configuration or multi-export modules may use kebab-case, for
+  example `query-client.ts`.
+- Folders use kebab-case.
+- Tests, stories, and Page Objects preserve the source file's casing and add a
+  descriptive suffix, for example `FeatureView.test.tsx`,
+  `FeatureView.stories.tsx`, or `Feature.PageObject.ts`.
+
+The `.tsx` extension means that a file may contain JSX. It does not require a
+PascalCase filename. Entry points and barrel modules such as `main.tsx` and
+`index.tsx` remain lowercase.
+
+Inside TypeScript code, use:
+
+- camelCase for functions, hooks, variables, and object properties.
+- PascalCase for React components, classes, and types.
+- UPPER_SNAKE_CASE for module-level constants when the distinction adds
+  clarity.
+
+Prefer matching the filename to its primary export. For modules without one
+primary export, choose a descriptive filename and follow the style of nearby
+files.
+
 ## Unified fix and verification command
 
 Provide a root-level `pnpm fix` command that:
