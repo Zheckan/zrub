@@ -1,5 +1,6 @@
 import path from 'node:path';
 
+import { asError } from '../errors.js';
 import type { LoadedResource } from '../catalog/types.js';
 import type { ExecutionResult, InstallationPlan } from '../installer/types.js';
 import { formatPlanReview } from './format-review.js';
@@ -15,10 +16,6 @@ export interface CliDependencies {
     targetRoot: string,
   ): Promise<InstallationPlan>;
   applyInstallationPlan(plan: InstallationPlan): Promise<ExecutionResult>;
-}
-
-function asError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
 }
 
 function countMessage(count: number, singular: string, plural: string): string {

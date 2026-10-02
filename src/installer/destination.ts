@@ -2,6 +2,7 @@ import { lstat } from 'node:fs/promises';
 import path from 'node:path';
 
 import type { LoadedResourceFile } from '../catalog/types.js';
+import { isMissingPath } from '../errors.js';
 
 function relativeWithin(targetRoot: string, destinationPath: string): string {
   const relative = path.relative(targetRoot, destinationPath);
@@ -41,10 +42,6 @@ export function resolveDestination(
 
   relativeWithin(resolvedTargetRoot, resolvedDestination);
   return resolvedDestination;
-}
-
-function isMissingPath(error: unknown): boolean {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT';
 }
 
 export async function assertSafeDestination(

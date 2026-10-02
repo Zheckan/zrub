@@ -2,13 +2,10 @@ import { lstat, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import type { LoadedResource, LoadedResourceFile } from '../catalog/types.js';
+import { isMissingPath } from '../errors.js';
 import { assertSafeDestination, resolveDestination } from './destination.js';
 import { inspectManagedBlock, wrapManagedBlock } from './managed-block.js';
 import type { InstallationOperation, InstallationPlan } from './types.js';
-
-function isMissingPath(error: unknown): boolean {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT';
-}
 
 function operationBase(
   resource: LoadedResource,

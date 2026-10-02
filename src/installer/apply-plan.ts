@@ -2,6 +2,7 @@ import { mkdir, open, rename, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 
+import { asError, isMissingPath } from '../errors.js';
 import { assertSafeDestination } from './destination.js';
 import type {
   ExecutionResult,
@@ -11,10 +12,6 @@ import type {
 
 export interface FileWriter {
   writeAtomically(destinationPath: string, content: string): Promise<void>;
-}
-
-function isMissingPath(error: unknown): boolean {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT';
 }
 
 async function removeTemporaryFile(temporaryPath: string): Promise<void> {
@@ -60,10 +57,6 @@ function isWritable(operation: InstallationOperation): boolean {
     operation.kind === 'prepend' ||
     operation.kind === 'replace-conflict'
   );
-}
-
-function asError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
 }
 
 export async function applyInstallationPlan(
