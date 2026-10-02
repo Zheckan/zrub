@@ -31,7 +31,7 @@ export async function runCli({
   applyInstallationPlan,
 }: CliDependencies): Promise<number> {
   try {
-    ui.intro('Project Blueprints');
+    ui.intro('Zrub');
     const resources = await loadCatalog(resourcesRoot);
     const selection = await ui.selectResources(resources);
 

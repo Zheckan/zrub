@@ -1,5 +1,5 @@
 {
-  "name": "project-blueprints",
+  "name": "zrub",
   "version": "0.1.0",
   "description": "Install reusable engineering guides, prompts, templates, examples, and code into projects.",
   "keywords": [
@@ -20,7 +20,7 @@
     "node": ">=22"
   },
   "bin": {
-    "project-blueprints": "dist/cli.js"
+    "zrub": "dist/cli.js"
   },
   "files": [
     "dist",

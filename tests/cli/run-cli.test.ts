@@ -137,7 +137,7 @@ describe('runCli', () => {
     await expect(runCli(deps)).resolves.toBe(0);
     expect(deps.planInstallation).not.toHaveBeenCalled();
     expect(ui.events).toEqual([
-      'intro:Project Blueprints',
+      'intro:Zrub',
       'select',
       'outro:Installation cancelled.',
     ]);

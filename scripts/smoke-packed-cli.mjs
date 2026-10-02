@@ -69,9 +69,7 @@ async function assertMissing(filePath) {
   throw new Error(`launcher unexpectedly installed: ${filePath}`);
 }
 
-const temporaryRoot = await mkdtemp(
-  path.join(tmpdir(), 'project-blueprints-launchers-'),
-);
+const temporaryRoot = await mkdtemp(path.join(tmpdir(), 'zrub-launchers-'));
 
 try {
   const packDirectory = path.join(temporaryRoot, 'pack');
@@ -97,14 +95,10 @@ try {
   assert.equal(tarballs.length, 1, 'expected exactly one packed tarball');
   const tarballPath = path.join(packDirectory, tarballs[0]);
   const launchers = [
-    ['npx', 'npx', ['--yes', '--package', tarballPath, 'project-blueprints']],
+    ['npx', 'npx', ['--yes', '--package', tarballPath, 'zrub']],
     ['pnpm dlx', 'pnpm', ['dlx', tarballPath]],
-    [
-      'yarn dlx',
-      'yarn',
-      ['dlx', '--package', tarballPath, 'project-blueprints'],
-    ],
-    ['bunx', 'bunx', ['--package', tarballPath, 'project-blueprints']],
+    ['yarn dlx', 'yarn', ['dlx', '--package', tarballPath, 'zrub']],
+    ['bunx', 'bunx', ['--package', tarballPath, 'zrub']],
   ];
   const launcherEnvironment = {
     ...process.env,
@@ -126,7 +120,7 @@ try {
     const failure = formatFailure(launcher, command, arguments_, result);
 
     assert.equal(result.code, 0, failure);
-    assert.match(result.stdout, /Project Blueprints/, failure);
+    assert.match(result.stdout, /Zrub/, failure);
     assert.match(result.stdout, /No resources selected\./, failure);
     await assertMissing(path.join(targetDirectory, 'AGENTS.md'));
     await assertMissing(path.join(targetDirectory, 'docs', 'project-guides'));

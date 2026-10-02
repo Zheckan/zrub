@@ -31,7 +31,7 @@ export const atomicFileWriter: FileWriter = {
 
     const temporaryPath = path.join(
       parentDirectory,
-      `.${path.basename(destinationPath)}.project-blueprints-${process.pid}-${randomUUID()}.tmp`,
+      `.${path.basename(destinationPath)}.zrub-${process.pid}-${randomUUID()}.tmp`,
     );
     let handle;
 

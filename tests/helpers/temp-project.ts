@@ -5,9 +5,7 @@ import path from 'node:path';
 export async function withTempDirectory(
   run: (directory: string) => Promise<void>,
 ): Promise<void> {
-  const directory = await mkdtemp(
-    path.join(tmpdir(), 'project-blueprints-test-'),
-  );
+  const directory = await mkdtemp(path.join(tmpdir(), 'zrub-test-'));
 
   try {
     await run(directory);

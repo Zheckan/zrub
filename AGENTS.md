@@ -1,6 +1,6 @@
-# Project Blueprints
+# Zrub
 
-This repository builds the `project-blueprints` npm CLI. Publishable resources
+This repository builds the `zrub` npm CLI. Publishable resources
 live in `resources/`; documentation about developing this repository lives in
 `docs/`. Runtime code lives in `src/`, and behavior is verified through
 `tests/`.

@@ -43,9 +43,7 @@ function run(command, arguments_, options = {}) {
   return result.stdout;
 }
 
-const temporaryDirectory = await mkdtemp(
-  path.join(tmpdir(), 'project-blueprints-package-'),
-);
+const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'zrub-package-'));
 
 try {
   run('pnpm', ['pack', '--json', '--pack-destination', temporaryDirectory]);
@@ -77,9 +75,9 @@ try {
   const packedPackage = JSON.parse(
     run('tar', ['-xOf', tarballPath, 'package/package.json']),
   );
-  assert.equal(packedPackage.name, 'project-blueprints');
+  assert.equal(packedPackage.name, 'zrub');
   assert.deepEqual(packedPackage.bin, {
-    'project-blueprints': 'dist/cli.js',
+    zrub: 'dist/cli.js',
   });
   assert.equal(packedPackage.engines?.node, '>=22');
 

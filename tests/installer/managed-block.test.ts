@@ -8,8 +8,8 @@ import {
 
 const resourceId = 'agents-project-guide';
 const markers = {
-  start: '<!-- project-blueprints:agents-project-guide:start -->',
-  end: '<!-- project-blueprints:agents-project-guide:end -->',
+  start: '<!-- zrub:agents-project-guide:start -->',
+  end: '<!-- zrub:agents-project-guide:end -->',
 };
 
 describe('managedMarkers', () => {

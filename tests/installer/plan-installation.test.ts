@@ -198,7 +198,7 @@ describe('planInstallation', () => {
       await mkdir(targetRoot);
       await writeFile(
         path.join(targetRoot, 'AGENTS.md'),
-        '<!-- project-blueprints:agents-project-guide:start -->\n',
+        '<!-- zrub:agents-project-guide:start -->\n',
       );
       const resource = await createResource(directory, {
         id: 'agents-project-guide',

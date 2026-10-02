@@ -8,8 +8,8 @@ export function managedMarkers(resourceId: string): {
   end: string;
 } {
   return {
-    start: `<!-- project-blueprints:${resourceId}:start -->`,
-    end: `<!-- project-blueprints:${resourceId}:end -->`,
+    start: `<!-- zrub:${resourceId}:start -->`,
+    end: `<!-- zrub:${resourceId}:end -->`,
   };
 }
 

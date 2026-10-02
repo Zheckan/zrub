@@ -1,6 +1,6 @@
-# Project Blueprints
+# Zrub
 
-`project-blueprints` is an interactive CLI for installing reusable engineering
+`zrub` is an interactive CLI for installing reusable engineering
 guides, prompts, templates, examples, and code into new or existing projects.
 
 > The package is under development and has not been published to npm yet.
@@ -8,10 +8,10 @@ guides, prompts, templates, examples, and code into new or existing projects.
 After publication, run one of these commands from the target project's root:
 
 ```sh
-npx project-blueprints@latest
-pnpm dlx project-blueprints@latest
-yarn dlx project-blueprints@latest
-bunx project-blueprints@latest
+npx zrub@latest
+pnpm dlx zrub@latest
+yarn dlx zrub@latest
+bunx zrub@latest
 ```
 
 Node.js 22 or newer is required. `yarn dlx` requires modern Yarn rather than
