@@ -2,6 +2,17 @@
   "name": "project-blueprints",
   "version": "0.1.0",
   "description": "Install reusable engineering guides, prompts, templates, examples, and code into projects.",
+  "keywords": [
+    "cli",
+    "scaffolding",
+    "boilerplate",
+    "templates",
+    "guides",
+    "prompts",
+    "agents",
+    "developer-experience"
+  ],
+  "author": "Zheckan",
   "type": "module",
   "license": "MIT",
   "packageManager": "pnpm@11.15.1",
@@ -17,6 +28,12 @@
     "README.md",
     "LICENSE"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zheckan/zrub.git"
+  },
+  "bugs": "https://github.com/Zheckan/zrub/issues",
+  "homepage": "https://github.com/Zheckan/zrub#readme",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -24,6 +41,8 @@
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "verify": "pnpm format:check && pnpm typecheck && pnpm test && pnpm build",
+    "fix": "pnpm format && pnpm verify",
     "package:check": "node scripts/verify-package-contents.mjs",
     "prepack": "pnpm run build",
     "smoke:launchers": "node scripts/smoke-packed-cli.mjs"

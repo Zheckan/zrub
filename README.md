@@ -74,13 +74,14 @@ Use pnpm 11.15.1 exclusively:
 
 ```sh
 pnpm install
-pnpm format:check
-pnpm typecheck
-pnpm test
-pnpm build
+pnpm verify
+pnpm fix
 pnpm package:check
 pnpm smoke:launchers
 ```
+
+`pnpm verify` runs `format:check`, `typecheck`, `test`, and `build`.
+`pnpm fix` formats the repository first and then verifies it.
 
 `pnpm package:check` builds a real npm tarball and validates its allowlisted
 contents. `pnpm smoke:launchers` packs the CLI and runs it through npx, pnpm
