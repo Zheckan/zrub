@@ -35,6 +35,10 @@ function markerIndexes(content: string, marker: string): number[] {
   return indexes;
 }
 
+function singleMarkerIndex(indexes: number[]): number | undefined {
+  return indexes.length === 1 ? indexes[0] : undefined;
+}
+
 export function inspectManagedBlock(
   resourceId: string,
   content: string,
@@ -47,17 +51,13 @@ export function inspectManagedBlock(
     return { kind: 'absent' };
   }
 
-  if (startIndexes.length !== 1 || endIndexes.length !== 1) {
+  const startIndex = singleMarkerIndex(startIndexes);
+  const endMarkerIndex = singleMarkerIndex(endIndexes);
+  if (startIndex === undefined || endMarkerIndex === undefined) {
     return {
       kind: 'malformed',
       reason: `Expected one start and one end marker, found ${startIndexes.length} start and ${endIndexes.length} end markers`,
     };
-  }
-
-  const startIndex = startIndexes[0];
-  const endMarkerIndex = endIndexes[0];
-  if (startIndex === undefined || endMarkerIndex === undefined) {
-    throw new Error('Managed marker inspection invariant failed');
   }
 
   if (startIndex > endMarkerIndex) {
