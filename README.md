@@ -28,6 +28,10 @@ required when launching through Bun.
   `docs/project-guides/frontend-project-structure.md`, a React guide organized
   around thin pages, feature-owned product logic, reusable domain logic, and a
   shared UI layer.
+- **GitHub repository setup profile** installs
+  `docs/project-guides/github-repo-setup-profile.md`, an agent runbook that
+  applies this project's standard GitHub settings, the `main-protection` branch
+  ruleset, and `release-tags` tag protection to a new repository.
 
 The catalog can later include guides, prompts, templates, examples, and code.
 

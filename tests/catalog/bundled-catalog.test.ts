@@ -4,7 +4,7 @@ import { bundledResourcesRoot } from '../../src/catalog/bundled-root.js';
 import { loadCatalog } from '../../src/catalog/load-catalog.js';
 
 describe('bundled catalog', () => {
-  it('contains the two initial resources', async () => {
+  it('contains the three initial resources', async () => {
     const resources = await loadCatalog(bundledResourcesRoot());
 
     expect(
@@ -36,6 +36,17 @@ describe('bundled catalog', () => {
           {
             source: 'frontend-project-structure.md',
             destination: 'docs/project-guides/frontend-project-structure.md',
+            onExisting: undefined,
+          },
+        ],
+      },
+      {
+        id: 'github-repo-setup-profile',
+        kind: 'guide',
+        files: [
+          {
+            source: 'github-repo-setup-profile.md',
+            destination: 'docs/project-guides/github-repo-setup-profile.md',
             onExisting: undefined,
           },
         ],
