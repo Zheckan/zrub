@@ -4,6 +4,7 @@ import {
   RESOURCE_KINDS,
   type ResourceDefinition,
   type ResourceFileDefinition,
+  type ResourceKind,
 } from './types.js';
 
 const RESOURCE_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -15,6 +16,12 @@ function fail(message: string): never {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isResourceKind(value: unknown): value is ResourceKind {
+  return (
+    typeof value === 'string' && RESOURCE_KINDS.some((kind) => kind === value)
+  );
 }
 
 function requireNonEmptyString(
@@ -114,10 +121,7 @@ export function validateResourceDefinition(input: unknown): ResourceDefinition {
   requireNonEmptyString(input.name, `${resourceId}.name`);
   requireNonEmptyString(input.description, `${resourceId}.description`);
 
-  if (
-    typeof input.kind !== 'string' ||
-    !RESOURCE_KINDS.some((kind) => kind === input.kind)
-  ) {
+  if (!isResourceKind(input.kind)) {
     fail(`${resourceId}.kind is not supported`);
   }
 
@@ -125,7 +129,17 @@ export function validateResourceDefinition(input: unknown): ResourceDefinition {
     fail(`${resourceId}.files must contain at least one file`);
   }
 
-  input.files.forEach((file, index) => validateFile(file, resourceId, index));
+  const files = input.files.map((file, index) => {
+    validateFile(file, resourceId, index);
+    return file;
+  });
 
-  return input as unknown as ResourceDefinition;
+  return {
+    schemaVersion: 1,
+    id: resourceId,
+    name: input.name,
+    description: input.description,
+    kind: input.kind,
+    files,
+  };
 }
