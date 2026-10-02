@@ -1,6 +1,7 @@
 import { lstat, readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
+import { isMissingPath } from '../errors.js';
 import type {
   LoadedResource,
   LoadedResourceFile,
@@ -17,7 +18,7 @@ async function readDefinition(
   try {
     source = await readFile(metadataPath, 'utf8');
   } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+    if (isMissingPath(error)) {
       throw new Error(`Missing resource metadata: ${metadataPath}`);
     }
     throw error;
@@ -52,20 +53,14 @@ async function resolvePayloads(
         throw new Error(`Payload escapes resource directory: ${file.source}`);
       }
 
-      try {
-        const stats = await lstat(sourcePath);
-        if (!stats.isFile()) {
-          throw new Error(`Payload must be a regular file: ${sourcePath}`);
-        }
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          'code' in error &&
-          error.code === 'ENOENT'
-        ) {
-          throw new Error(`Payload must be a regular file: ${sourcePath}`);
+      const stats = await lstat(sourcePath).catch((error: unknown) => {
+        if (isMissingPath(error)) {
+          throw new Error(`Payload not found: ${sourcePath}`);
         }
         throw error;
+      });
+      if (!stats.isFile()) {
+        throw new Error(`Payload must be a regular file: ${sourcePath}`);
       }
 
       return { ...file, sourcePath };

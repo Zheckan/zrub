@@ -130,7 +130,7 @@ describe('loadCatalog', () => {
       );
 
       await expect(loadCatalog(catalogRoot)).rejects.toThrow(
-        /Payload must be a regular file.*absent\.md/,
+        /Payload not found.*absent\.md/,
       );
     });
   });
