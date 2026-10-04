@@ -15,6 +15,6 @@ confusion, and non-obvious constraints.
 - Keep each finding short enough that the next reader can act on it without
   asking how.
 
-## Findings
+## FINDINGS
 
 <!-- Replace this comment with findings. -->

@@ -17,7 +17,7 @@ live in `resources/`; documentation about developing this repository lives in
 - Before claiming success, run `pnpm format:check`, `pnpm typecheck`,
   `pnpm test`, and `pnpm build`.
 
-## Findings
+## FINDINGS
 
 Findings live in [docs/findings.md](docs/findings.md). Read it before
 starting and record new findings there.

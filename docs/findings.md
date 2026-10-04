@@ -16,7 +16,7 @@ findings in the ledger below.
 - Keep each finding short enough that the next reader can act on it without
   asking how.
 
-## Findings
+## FINDINGS
 
 - Clack's multiselect treats carriage return (`\r`) as the Enter key in piped
   launcher smoke tests; a newline (`\n`) leaves the top-level prompt unsettled.

@@ -10,7 +10,7 @@
 
 <!-- Replace this comment with setup, development, test, build, and validation commands. -->
 
-## Findings
+## FINDINGS
 
 Findings live in `docs/findings.md`. Read it before starting and record new
 findings there.
