@@ -21,12 +21,13 @@ required when launching through Bun.
 ## Included resources
 
 - **Agent project guide** installs a managed, editable section at the top of
-  `AGENTS.md`. It provides a project overview, important conventions,
-  verification commands, and a shared Findings section that links to zrub's
-  findings guide. The section also links to the GitHub repository setup
-  profile, so an agent in any project knows the standard `gh api` commands
-  without reviewing other repositories. Existing content stays below the
-  inserted section.
+  `AGENTS.md` with a project overview, important conventions, and verification
+  commands, plus `docs/findings.md`, the findings ledger with its recording
+  guide. When `AGENTS.md` already exists, the CLI prepends only a small
+  provenance block with the zrub links instead of the full template. The
+  section links to the GitHub repository setup profile, so an agent in any
+  project knows the standard `gh api` commands without reviewing other
+  repositories. Existing content stays below the inserted section.
 - **Frontend project structure** installs
   `docs/project-guides/frontend-project-structure.md`, a React guide organized
   around thin pages, feature-owned product logic, reusable domain logic, and a
@@ -53,11 +54,12 @@ replacement as a conflict and the CLI warns before the single confirmation.
 Malformed managed markers block installation instead of guessing how to edit
 the file.
 
-The `AGENTS.md` template uses stable managed markers. The first run creates or
-prepends the section; later runs recognize it and preserve everything inside it
-byte-for-byte, including project notes and Findings written by agents. The CLI
-reviews every write before asking for approval, and cancellation or an empty
-selection makes no changes.
+The `AGENTS.md` template uses stable managed markers. The first run creates
+the full guide when `AGENTS.md` is absent or prepends only a small provenance
+block when it already exists; later runs recognize the markers and preserve
+everything inside them byte-for-byte, including project notes and findings
+written by agents. The CLI reviews every write before asking for approval,
+and cancellation or an empty selection makes no changes.
 
 ## Resource catalog
 

@@ -2,8 +2,7 @@
 
 This document records what agents and humans learn while working in this
 repository: concise, verified, project-wide surprises, recurring sources of
-confusion, and non-obvious constraints. `AGENTS.md` links here; record new
-findings in the ledger below.
+confusion, and non-obvious constraints.
 
 ## How to record
 
@@ -18,8 +17,4 @@ findings in the ledger below.
 
 ## Findings
 
-- Clack's multiselect treats carriage return (`\r`) as the Enter key in piped
-  launcher smoke tests; a newline (`\n`) leaves the top-level prompt unsettled.
-- To smoke-test an npm tarball, npx must receive it through `--package`
-  followed by the bin name. Passing the tarball as npx's positional command
-  attempts to execute the archive itself.
+<!-- Replace this comment with findings. -->

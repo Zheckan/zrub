@@ -12,10 +12,8 @@
 
 ## Findings
 
-Record findings below. How to write them:
-https://github.com/Zheckan/zrub/blob/main/docs/findings.md
-
-<!-- Replace this comment with findings. -->
+Findings live in `docs/findings.md`. Read it before starting and record new
+findings there.
 
 ## Installed by zrub
 

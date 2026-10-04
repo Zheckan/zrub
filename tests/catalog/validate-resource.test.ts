@@ -13,6 +13,7 @@ const validResource = {
       source: 'AGENTS.md',
       destination: './',
       onExisting: 'managed-prepend-once',
+      existingSource: 'AGENTS.existing.md',
     },
   ],
 };
@@ -100,6 +101,47 @@ describe('validateResourceDefinition', () => {
             source: 'AGENTS.md',
             destination: 'config.json',
             onExisting: 'managed-prepend-once',
+          },
+        ],
+      },
+    ],
+    [
+      'managed policy with non-Markdown existing source',
+      {
+        ...validResource,
+        files: [
+          {
+            source: 'AGENTS.md',
+            destination: './',
+            onExisting: 'managed-prepend-once',
+            existingSource: 'config.json',
+          },
+        ],
+      },
+    ],
+    [
+      'existing source without the managed policy',
+      {
+        ...validResource,
+        files: [
+          {
+            source: 'AGENTS.md',
+            destination: './',
+            existingSource: 'AGENTS.existing.md',
+          },
+        ],
+      },
+    ],
+    [
+      'traversing existing source',
+      {
+        ...validResource,
+        files: [
+          {
+            source: 'AGENTS.md',
+            destination: './',
+            onExisting: 'managed-prepend-once',
+            existingSource: '../AGENTS.existing.md',
           },
         ],
       },

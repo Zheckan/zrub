@@ -8,7 +8,12 @@
     {
       "source": "AGENTS.md",
       "destination": "./",
-      "onExisting": "managed-prepend-once"
+      "onExisting": "managed-prepend-once",
+      "existingSource": "AGENTS.existing.md"
+    },
+    {
+      "source": "findings.md",
+      "destination": "docs/findings.md"
     }
   ]
 }

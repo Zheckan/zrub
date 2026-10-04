@@ -36,34 +36,54 @@ async function readDefinition(
   return validateResourceDefinition(input);
 }
 
+async function resolvePayloadPath(
+  resourceDirectory: string,
+  source: string,
+): Promise<string> {
+  const sourcePath = path.resolve(resourceDirectory, source);
+  const relative = path.relative(resourceDirectory, sourcePath);
+
+  if (
+    relative === '..' ||
+    relative.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relative)
+  ) {
+    throw new Error(`Payload escapes resource directory: ${source}`);
+  }
+
+  const stats = await lstat(sourcePath).catch((error: unknown) => {
+    if (isMissingPath(error)) {
+      throw new Error(`Payload not found: ${sourcePath}`);
+    }
+    throw error;
+  });
+  if (!stats.isFile()) {
+    throw new Error(`Payload must be a regular file: ${sourcePath}`);
+  }
+
+  return sourcePath;
+}
+
 async function resolvePayloads(
   resourceDirectory: string,
   definition: ResourceDefinition,
 ): Promise<LoadedResourceFile[]> {
   return Promise.all(
     definition.files.map(async (file) => {
-      const sourcePath = path.resolve(resourceDirectory, file.source);
-      const relative = path.relative(resourceDirectory, sourcePath);
+      const sourcePath = await resolvePayloadPath(
+        resourceDirectory,
+        file.source,
+      );
+      const existingSourcePath =
+        file.existingSource === undefined
+          ? undefined
+          : await resolvePayloadPath(resourceDirectory, file.existingSource);
 
-      if (
-        relative === '..' ||
-        relative.startsWith(`..${path.sep}`) ||
-        path.isAbsolute(relative)
-      ) {
-        throw new Error(`Payload escapes resource directory: ${file.source}`);
-      }
-
-      const stats = await lstat(sourcePath).catch((error: unknown) => {
-        if (isMissingPath(error)) {
-          throw new Error(`Payload not found: ${sourcePath}`);
-        }
-        throw error;
-      });
-      if (!stats.isFile()) {
-        throw new Error(`Payload must be a regular file: ${sourcePath}`);
-      }
-
-      return { ...file, sourcePath };
+      return {
+        ...file,
+        sourcePath,
+        ...(existingSourcePath === undefined ? {} : { existingSourcePath }),
+      };
     }),
   );
 }

@@ -18,6 +18,7 @@ interface ResourceOptions {
   content?: string;
   destination?: string;
   managed?: boolean;
+  existingSource?: string;
 }
 
 async function createResource(
@@ -28,6 +29,7 @@ async function createResource(
     content = '# New guide\n',
     destination = 'docs/guide.md',
     managed = false,
+    existingSource,
   }: ResourceOptions = {},
 ): Promise<LoadedResource> {
   const resourceDirectory = path.join(directory, 'catalog', id);
@@ -35,11 +37,18 @@ async function createResource(
   await mkdir(resourceDirectory, { recursive: true });
   await writeFile(sourcePath, content);
 
+  let existingSourcePath: string | undefined;
+  if (existingSource !== undefined) {
+    existingSourcePath = path.join(resourceDirectory, existingSource);
+    await writeFile(existingSourcePath, '## Installed by zrub\n');
+  }
+
   const file: LoadedResourceFile = {
     source: 'guide.md',
     sourcePath,
     destination,
     ...(managed ? { onExisting: 'managed-prepend-once' as const } : {}),
+    ...(existingSourcePath === undefined ? {} : { existingSourcePath }),
   };
 
   return {
@@ -161,6 +170,32 @@ describe('planInstallation', () => {
         nextContent: `${wrapManagedBlock(
           'agents-project-guide',
           '## Findings\n',
+        )}\n# Existing\n`,
+      });
+    });
+  });
+
+  it('prepends only the existing-source payload above existing content', async () => {
+    await withTempDirectory(async (directory) => {
+      const targetRoot = path.join(directory, 'target');
+      await mkdir(targetRoot);
+      await writeFile(path.join(targetRoot, 'AGENTS.md'), '# Existing\n');
+      const resource = await createResource(directory, {
+        id: 'agents-project-guide',
+        kind: 'template',
+        managed: true,
+        destination: 'AGENTS.md',
+        content: '## Full template that must not be prepended\n',
+        existingSource: 'AGENTS.existing.md',
+      });
+
+      const plan = await planInstallation([resource], targetRoot);
+
+      expect(plan.operations[0]).toMatchObject({
+        kind: 'prepend',
+        nextContent: `${wrapManagedBlock(
+          'agents-project-guide',
+          '## Installed by zrub\n',
         )}\n# Existing\n`,
       });
     });

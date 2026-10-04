@@ -90,6 +90,20 @@ function validateFile(
     fail(`${prefix}.onExisting is not supported`);
   }
 
+  if (value.existingSource !== undefined) {
+    if (value.onExisting !== 'managed-prepend-once') {
+      fail(`${prefix}.existingSource requires the managed-prepend-once policy`);
+    }
+    validateRelativePath(
+      value.existingSource,
+      `${prefix}.existingSource`,
+      false,
+    );
+    if (!isMarkdownPath(value.existingSource)) {
+      fail(`${prefix}.existingSource must be a Markdown file`);
+    }
+  }
+
   if (value.onExisting === 'managed-prepend-once') {
     const resolvedDestination = value.destination.endsWith('/')
       ? value.source

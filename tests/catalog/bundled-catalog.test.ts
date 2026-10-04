@@ -11,11 +11,14 @@ describe('bundled catalog', () => {
       resources.map(({ id, kind, files }) => ({
         id,
         kind,
-        files: files.map(({ source, destination, onExisting }) => ({
-          source,
-          destination,
-          onExisting,
-        })),
+        files: files.map(
+          ({ source, destination, onExisting, existingSource }) => ({
+            source,
+            destination,
+            onExisting,
+            existingSource,
+          }),
+        ),
       })),
     ).toEqual([
       {
@@ -26,6 +29,12 @@ describe('bundled catalog', () => {
             source: 'AGENTS.md',
             destination: './',
             onExisting: 'managed-prepend-once',
+            existingSource: 'AGENTS.existing.md',
+          },
+          {
+            source: 'findings.md',
+            destination: 'docs/findings.md',
+            onExisting: undefined,
           },
         ],
       },

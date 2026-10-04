@@ -44,22 +44,24 @@ async function planFile(
 ): Promise<InstallationOperation> {
   const destinationPath = resolveDestination(targetRoot, file);
   await assertSafeDestination(targetRoot, destinationPath);
-
-  const sourceContent = await readFile(file.sourcePath, 'utf8');
   const base = operationBase(resource, file, destinationPath);
+  const managed = file.onExisting === 'managed-prepend-once';
+
   if (!(await destinationExists(destinationPath))) {
+    const sourceContent = await readFile(file.sourcePath, 'utf8');
     return {
       ...base,
       kind: 'create',
-      nextContent:
-        file.onExisting === 'managed-prepend-once'
-          ? wrapManagedBlock(resource.id, sourceContent)
-          : sourceContent,
+      nextContent: managed
+        ? wrapManagedBlock(resource.id, sourceContent)
+        : sourceContent,
     };
   }
 
   const existingContent = await readFile(destinationPath, 'utf8');
-  if (file.onExisting === 'managed-prepend-once') {
+  if (managed) {
+    const payloadPath = file.existingSourcePath ?? file.sourcePath;
+    const payloadContent = await readFile(payloadPath, 'utf8');
     const managedState = inspectManagedBlock(resource.id, existingContent);
     if (managedState.kind === 'installed') {
       return { ...base, kind: 'already-installed' };
@@ -75,10 +77,11 @@ async function planFile(
     return {
       ...base,
       kind: 'prepend',
-      nextContent: `${wrapManagedBlock(resource.id, sourceContent)}\n${existingContent}`,
+      nextContent: `${wrapManagedBlock(resource.id, payloadContent)}\n${existingContent}`,
     };
   }
 
+  const sourceContent = await readFile(file.sourcePath, 'utf8');
   if (existingContent === sourceContent) {
     return { ...base, kind: 'unchanged' };
   }

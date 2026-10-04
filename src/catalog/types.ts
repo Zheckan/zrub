@@ -13,6 +13,7 @@ export interface ResourceFileDefinition {
   source: string;
   destination: string;
   onExisting?: ExistingFilePolicy;
+  existingSource?: string;
 }
 
 export interface ResourceDefinition {
@@ -26,6 +27,7 @@ export interface ResourceDefinition {
 
 export interface LoadedResourceFile extends ResourceFileDefinition {
   sourcePath: string;
+  existingSourcePath?: string;
 }
 
 export interface LoadedResource extends ResourceDefinition {
