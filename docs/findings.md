@@ -23,3 +23,7 @@ findings in the ledger below.
 - To smoke-test an npm tarball, npx must receive it through `--package`
   followed by the bin name. Passing the tarball as npx's positional command
   attempts to execute the archive itself.
+- The ruleset REST schema requires `require_code_owner_review` and
+  `require_last_push_approval` inside the `pull_request` parameters; the first
+  version of the setup-profile runbook omitted both and its example failed
+  with 422 (`/rules/3: data matches no possible input`).
