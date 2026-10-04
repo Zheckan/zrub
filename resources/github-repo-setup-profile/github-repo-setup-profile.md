@@ -120,6 +120,8 @@ gh api --method POST repos/{owner}/{repo}/rulesets --input - <<'EOF'
       "parameters": {
         "required_approving_review_count": 0,
         "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
         "required_review_thread_resolution": true,
         "allowed_merge_methods": ["squash"]
       }
