@@ -18,9 +18,10 @@ findings there.
 ## Installed by zrub
 
 This section is installed and updated by
-[zrub](https://github.com/Zheckan/zrub#readme). Run `npx zrub@latest` to
-reinstall this guide or install more guides.
+[zrub](https://github.com/Zheckan/zrub#readme).
 
+- Agent maintenance manual (updates, reinstallation, the GitHub standard):
+  `docs/project-guides/zrub.md`
 - GitHub repository setup standard (repository settings, the
   `main-protection` branch ruleset, and release-tag protection, with the exact
   `gh api` commands): https://github.com/Zheckan/zrub/blob/main/resources/github-repo-setup-profile/github-repo-setup-profile.md

@@ -17,6 +17,7 @@ const requiredEntries = [
   'package/resources/agents-project-guide/AGENTS.md',
   'package/resources/agents-project-guide/AGENTS.existing.md',
   'package/resources/agents-project-guide/findings.md',
+  'package/resources/agents-project-guide/zrub.md',
   'package/resources/github-repo-setup-profile/resource.json',
   'package/resources/github-repo-setup-profile/github-repo-setup-profile.md',
 ];

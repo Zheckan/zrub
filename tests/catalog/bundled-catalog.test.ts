@@ -36,6 +36,11 @@ describe('bundled catalog', () => {
             destination: 'docs/findings.md',
             onExisting: undefined,
           },
+          {
+            source: 'zrub.md',
+            destination: 'docs/project-guides/zrub.md',
+            onExisting: undefined,
+          },
         ],
       },
       {

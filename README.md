@@ -23,8 +23,9 @@ required when launching through Bun.
 - **Agent project guide** installs a managed, editable section at the top of
   `AGENTS.md` with a project overview, important conventions, and verification
   commands, plus `docs/findings.md`, the findings ledger with its recording
-  guide. When `AGENTS.md` already exists, the CLI prepends only a small
-  provenance block with the zrub links instead of the full template. The
+  guide, and `docs/project-guides/zrub.md`, the agent's self-service
+  maintenance manual. When `AGENTS.md` already exists, the CLI prepends only a
+  small provenance block with the zrub links instead of the full template. The
   section links to the GitHub repository setup profile, so an agent in any
   project knows the standard `gh api` commands without reviewing other
   repositories. Existing content stays below the inserted section.

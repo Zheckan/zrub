@@ -4,6 +4,8 @@ This managed section is installed and updated by
 [zrub](https://github.com/Zheckan/zrub#readme). Run `npx zrub@latest` to
 install more guides.
 
+- Agent maintenance manual (updates, reinstallation, the GitHub standard):
+  `docs/project-guides/zrub.md`
 - Findings ledger: `docs/findings.md`. Read it before starting and record new
   findings there.
 - GitHub repository setup standard (repository settings, the

@@ -14,6 +14,10 @@
     {
       "source": "findings.md",
       "destination": "docs/findings.md"
+    },
+    {
+      "source": "zrub.md",
+      "destination": "docs/project-guides/zrub.md"
     }
   ]
 }
