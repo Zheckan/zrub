@@ -1,0 +1,60 @@
+{
+  "name": "zrub",
+  "version": "0.1.0",
+  "description": "Install reusable engineering guides, prompts, templates, examples, and code into projects.",
+  "keywords": [
+    "cli",
+    "scaffolding",
+    "boilerplate",
+    "templates",
+    "guides",
+    "prompts",
+    "agents",
+    "developer-experience"
+  ],
+  "author": "Zheckan",
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@11.15.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "zrub": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "resources",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zheckan/zrub.git"
+  },
+  "bugs": "https://github.com/Zheckan/zrub/issues",
+  "homepage": "https://github.com/Zheckan/zrub#readme",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify": "pnpm format:check && pnpm typecheck && pnpm test && pnpm build",
+    "fix": "pnpm format && pnpm verify",
+    "package:check": "node scripts/verify-package-contents.mjs",
+    "prepack": "pnpm run build",
+    "smoke:launchers": "node scripts/smoke-packed-cli.mjs"
+  },
+  "dependencies": {
+    "@clack/prompts": "1.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "@yarnpkg/cli-dist": "4.17.1",
+    "prettier": "3.9.5",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "agents-project-guide",
+  "name": "Agent project guide",
+  "description": "Adds an editable project overview, verification guidance, and shared findings template for coding agents.",
+  "kind": "template",
+  "files": [
+    {
+      "source": "AGENTS.md",
+      "destination": "./",
+      "onExisting": "managed-prepend-once",
+      "existingSource": "AGENTS.existing.md"
+    },
+    {
+      "source": "findings.md",
+      "destination": "docs/findings.md"
+    },
+    {
+      "source": "zrub.md",
+      "destination": "docs/project-guides/zrub.md"
+    }
+  ]
+}
