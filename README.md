@@ -22,8 +22,11 @@ required when launching through Bun.
 
 - **Agent project guide** installs a managed, editable section at the top of
   `AGENTS.md`. It provides a project overview, important conventions,
-  verification commands, and a shared Findings section. Existing content stays
-  below the inserted section.
+  verification commands, and a shared Findings section that links to zrub's
+  findings guide. The section also links to the GitHub repository setup
+  profile, so an agent in any project knows the standard `gh api` commands
+  without reviewing other repositories. Existing content stays below the
+  inserted section.
 - **Frontend project structure** installs
   `docs/project-guides/frontend-project-structure.md`, a React guide organized
   around thin pages, feature-owned product logic, reusable domain logic, and a

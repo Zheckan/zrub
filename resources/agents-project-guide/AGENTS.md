@@ -12,6 +12,17 @@
 
 ## Findings
 
-Record concise, verified, project-wide surprises, recurring sources of
-confusion, and non-obvious constraints here. Do not use this section as a work
-log. Never record secrets. Correct or remove stale findings.
+Record findings below. How to write them:
+https://github.com/Zheckan/zrub/blob/main/docs/findings.md
+
+<!-- Replace this comment with findings. -->
+
+## Installed by zrub
+
+This section is installed and updated by
+[zrub](https://github.com/Zheckan/zrub#readme). Run `npx zrub@latest` to
+reinstall this guide or install more guides.
+
+- GitHub repository setup standard (repository settings, the
+  `main-protection` branch ruleset, and release-tag protection, with the exact
+  `gh api` commands): https://github.com/Zheckan/zrub/blob/main/resources/github-repo-setup-profile/github-repo-setup-profile.md
