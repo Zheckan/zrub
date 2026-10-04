@@ -3,6 +3,11 @@
 `zrub` is an interactive CLI for installing reusable engineering
 guides, prompts, templates, examples, and code into new or existing projects.
 
+> **MVP:** this first release ships the interactive installer with three
+> bundled resources. The catalog and the surrounding workflows — a persistent
+> installation manifest, `list`/`update`/`remove` commands, and automated
+> repository setup — will expand dramatically in future releases.
+
 Run one of these commands from the target project's root:
 
 ```sh
