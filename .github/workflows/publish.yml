@@ -1,0 +1,48 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.15.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org/
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve versions
+        id: versions
+        run: |
+          echo "local=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          remote="$(npm view @zheckan/zrub version 2>/dev/null || true)"
+          echo "remote=${remote:-none}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish if the version is new
+        if: steps.versions.outputs.remote != steps.versions.outputs.local
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
