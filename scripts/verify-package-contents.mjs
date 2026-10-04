@@ -80,7 +80,7 @@ try {
   const packedPackage = JSON.parse(
     run('tar', ['-xOf', tarballPath, 'package/package.json']),
   );
-  assert.equal(packedPackage.name, 'zrub');
+  assert.equal(packedPackage.name, '@zheckan/zrub');
   assert.deepEqual(packedPackage.bin, {
     zrub: 'dist/cli.js',
   });

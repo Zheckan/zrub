@@ -13,7 +13,7 @@ the repository standard without asking anyone.
 
 ## Tasks
 
-- Reinstall, update, or add guides: run `npx zrub@latest`. The managed
+- Reinstall, update, or add guides: run `npx @zheckan/zrub@latest`. The managed
   `AGENTS.md` section is preserved byte-for-byte; every other write is shown
   for review first.
 - Re-apply the GitHub repository standard (settings, the `main-protection`

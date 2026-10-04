@@ -1,5 +1,5 @@
 {
-  "name": "zrub",
+  "name": "@zheckan/zrub",
   "version": "0.1.0",
   "description": "Install reusable engineering guides, prompts, templates, examples, and code into projects.",
   "keywords": [
@@ -21,6 +21,9 @@
   },
   "bin": {
     "zrub": "dist/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "dist",
