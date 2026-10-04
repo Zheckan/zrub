@@ -6,10 +6,10 @@ guides, prompts, templates, examples, and code into new or existing projects.
 Run one of these commands from the target project's root:
 
 ```sh
-npx zrub@latest
-pnpm dlx zrub@latest
-yarn dlx zrub@latest
-bunx zrub@latest
+npx @zheckan/zrub@latest
+pnpm dlx @zheckan/zrub@latest
+yarn dlx @zheckan/zrub@latest
+bunx @zheckan/zrub@latest
 ```
 
 Node.js 22 or newer is required. `yarn dlx` requires modern Yarn rather than
