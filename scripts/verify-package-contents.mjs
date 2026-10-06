@@ -20,6 +20,8 @@ const requiredEntries = [
   'package/resources/agents-project-guide/zrub.md',
   'package/resources/github-repo-setup-profile/resource.json',
   'package/resources/github-repo-setup-profile/github-repo-setup-profile.md',
+  'package/resources/typescript-ci-setup/resource.json',
+  'package/resources/typescript-ci-setup/typescript-ci-setup.md',
 ];
 const excludedPrefixes = [
   'package/src/',

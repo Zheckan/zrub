@@ -4,7 +4,7 @@
 code into new or existing projects. You pick resources in a checkbox menu,
 review every planned file write, confirm once, and the CLI does the rest.
 
-> **MVP.** This first release is the interactive installer with three bundled
+> **MVP.** This first release is the interactive installer with four bundled
 > resources. Later releases add a persistent installation manifest, list and
 > update and remove commands, and automated repository setup. The catalog
 > will grow a lot.
@@ -33,6 +33,8 @@ required when you launch through Bun.
   `docs/findings.md`, the findings ledger with its recording rules, and
   `docs/project-guides/zrub.md`, the agent's maintenance manual. Existing
   content stays below the managed section.
+  The manual explains the full and minimal instruction variants, document
+  ownership, conditional guide links, and how updates preserve edits.
 - **Frontend project structure.**
   `docs/project-guides/frontend-project-structure.md` organizes a React
   codebase around thin pages, feature-owned product logic, reusable domain
@@ -43,6 +45,12 @@ required when you launch through Bun.
   branch ruleset, and `release-tags` tag protection to a new repository. It
   changes remote configuration only and never writes files into the target
   repository.
+- **TypeScript CI setup.** `docs/project-guides/typescript-ci-setup.md`
+  includes complete GitHub Actions examples for separate checks and a shared
+  job. Before selecting or changing the layout, the guide requires the agent
+  to confirm whether the user prefers individual check results or lower runner
+  usage. It also covers caching, cancellation, project prerequisites, and
+  required-check migration.
 
 The catalog holds guides, prompts, templates, examples, and code. Adding one
 is a folder away, as described in the `Resource catalog` section.
@@ -87,6 +95,11 @@ one:
 
 Documentation about developing this repository belongs in `docs/`, not in the
 publishable catalog.
+
+The package version identifies a bundled catalog release; `schemaVersion`
+identifies the metadata format. Individual resources currently have no version
+field or installed-revision tracking. The agent template variants and CI
+layouts are choices within resources, not separately versioned releases.
 
 ## Development
 

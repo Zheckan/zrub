@@ -4,7 +4,7 @@ import { bundledResourcesRoot } from '../../src/catalog/bundled-root.js';
 import { loadCatalog } from '../../src/catalog/load-catalog.js';
 
 describe('bundled catalog', () => {
-  it('contains the three initial resources', async () => {
+  it('contains the bundled resources with their installation mappings', async () => {
     const resources = await loadCatalog(bundledResourcesRoot());
 
     expect(
@@ -61,6 +61,17 @@ describe('bundled catalog', () => {
           {
             source: 'github-repo-setup-profile.md',
             destination: 'docs/project-guides/github-repo-setup-profile.md',
+            onExisting: undefined,
+          },
+        ],
+      },
+      {
+        id: 'typescript-ci-setup',
+        kind: 'guide',
+        files: [
+          {
+            source: 'typescript-ci-setup.md',
+            destination: 'docs/project-guides/typescript-ci-setup.md',
             onExisting: undefined,
           },
         ],

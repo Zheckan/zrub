@@ -68,6 +68,11 @@ Notes:
 
 ## 2. Derive required status-check names
 
+When creating or restructuring TypeScript CI, first follow the
+[TypeScript CI setup guide](https://github.com/Zheckan/zrub/blob/main/resources/typescript-ci-setup/typescript-ci-setup.md).
+Confirm whether the user prefers separate check results or lower runner usage.
+Its two layouts produce different required check names.
+
 Required status checks must match workflow check names exactly. List the check
 names the latest commit produced:
 

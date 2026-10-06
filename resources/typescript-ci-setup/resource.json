@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "typescript-ci-setup",
+  "name": "TypeScript CI setup",
+  "description": "A GitHub Actions guide with separate and consolidated checks, an explicit layout choice, and required-check migration guidance.",
+  "kind": "guide",
+  "files": [
+    {
+      "source": "typescript-ci-setup.md",
+      "destination": "docs/project-guides/typescript-ci-setup.md"
+    }
+  ]
+}

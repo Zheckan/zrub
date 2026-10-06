@@ -27,3 +27,9 @@ findings in the ledger below.
   `require_last_push_approval` inside the `pull_request` parameters; the first
   version of the setup-profile runbook omitted both and its example failed
   with 422 (`/rules/3: data matches no possible input`).
+- `schemaVersion` versions resource metadata, not guide content. The package
+  version identifies the bundled catalog; individual resources have no version
+  field or installed-revision tracking.
+- Full and minimal `AGENTS.md` templates are selected only on first
+  installation. Reinstallation preserves the managed block byte-for-byte, so
+  new guide links in a bundled template do not reach existing managed blocks.
