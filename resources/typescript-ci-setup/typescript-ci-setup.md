@@ -2,8 +2,9 @@
 
 Use this guide when creating GitHub Actions CI for a TypeScript project or
 changing how its checks are grouped. Adapt one example into the target
-project's `.github/workflows/ci.yml`. Installing this guide does not create a
-workflow or change GitHub settings.
+project's `.github/workflows/ci.yml`. Keep this CI guide separate from the
+GitHub repository settings runbook. Reading or installing this guide does not
+create the workflow; applying it produces the project-specific workflow file.
 
 ## 1. Inspect the project and confirm the layout
 

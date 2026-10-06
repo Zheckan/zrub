@@ -18,6 +18,9 @@ findings in the ledger below.
 
 ## FINDINGS
 
+- The root `AGENTS.md` guides contributors who add resources to Zrub.
+  `resources/agents-project-guide/zrub.md` is a payload delivered to other
+  projects and holds their installation maintenance instructions.
 - Clack's multiselect treats carriage return (`\r`) as the Enter key in piped
   launcher smoke tests; a newline (`\n`) leaves the top-level prompt unsettled.
 - To smoke-test an npm tarball, npx must receive it through `--package`

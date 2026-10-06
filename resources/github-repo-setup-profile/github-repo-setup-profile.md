@@ -5,9 +5,9 @@ configuration so the same settings, branch protection, and release-tag rules
 are applied every time without reviewing other repositories first. Follow it
 top to bottom and treat every remote change as one reviewed installation.
 
-The runbook changes remote configuration only. It never writes files into the
-target repository. A reader that only needs the result can stop after the
-verification step.
+This is a one-off setup runbook. Read and follow it from its source without
+copying the document into the target project. It changes remote configuration
+only. A reader that only needs the result can stop after the verification step.
 
 ## Safety rules for the agent
 

@@ -33,8 +33,7 @@ required when you launch through Bun.
   `docs/findings.md`, the findings ledger with its recording rules, and
   `docs/project-guides/zrub.md`, the agent's maintenance manual. Existing
   content stays below the managed section.
-  The manual explains the full and minimal instruction variants, document
-  ownership, conditional guide links, and how updates preserve edits.
+  The manual covers reinstallation, managed markers, and links to setup guides.
 - **Frontend project structure.**
   `docs/project-guides/frontend-project-structure.md` organizes a React
   codebase around thin pages, feature-owned product logic, reusable domain

@@ -3,6 +3,48 @@
 These ideas are intentionally outside the current MVP. Each requires its own
 design and approval before implementation.
 
+## Read-once access for every document
+
+Every catalog document should support a read-once mode that returns its
+contents to the user or agent without installing a copy in the target project.
+Make this available to all documents, including project guides, prompts,
+setup runbooks, and document templates. It must not be a special case limited
+to GitHub setup or another selected resource.
+
+Reading a document must not create project files, managed blocks, or an
+installation record. Keep reading separate from executing its instructions:
+a user can read a setup runbook without authorizing the remote changes it
+describes. If the user asks the agent to apply instructions, use the normal
+authorization and review flow for those actions.
+
+GitHub repository setup is a one-off use of this general mode. Read and follow
+the runbook from its source without adding it to the project. CI setup uses a
+separate guide and produces a project-specific workflow file such as
+`.github/workflows/ci.yml`; that output is distinct from installing the guide.
+
+Design how users and agents discover, select, and retrieve a document before
+implementing this mode. The existing CLI currently supports file installation.
+
+## Global agent skills
+
+Support distributing and installing agent skills globally so the same workflow
+can be used across projects. A skill includes its `SKILL.md` and any referenced
+scripts, examples, templates, or other supporting files.
+
+Design this separately from project document installation:
+
+- Detect the selected agent's supported global skill location and confirm the
+  target agent and scope when they are ambiguous.
+- Keep the complete skill directory together and preserve relative references.
+- Review creates, updates, and conflicts before writing; preserve user changes
+  and unrelated skills.
+- Define discovery, version tracking, updates, and removal for global skills.
+- Validate every payload path within its declared skill root and validate the
+  destination using the same containment rules as project resources.
+
+The current resource schema and project installer do not yet implement global
+skill installation.
+
 ## GitHub repository setup profiles
 
 Allow the catalog to contain reusable GitHub repository profiles. A profile
@@ -30,9 +72,9 @@ stronger safeguards:
   selects active enforcement.
 - Read the ruleset back after creation and report the verified result.
 
-### Installation stages
+### Application stages
 
-Treat the profile as one reviewed installation with ordered stages:
+Treat applying the profile as one reviewed setup task with ordered stages:
 
 1. Read and snapshot the current repository settings and rulesets.
 2. Resolve target-specific values such as the default branch and status-check
@@ -63,7 +105,7 @@ The first profile should reproduce this repository configuration:
 - Do not enable the preview limit for branches and tags updated in one push.
 - Automatically close issues linked to merged pull requests.
 
-The matching branch ruleset should be installed as part of the same profile so
+The matching branch ruleset should be applied as part of the same profile so
 its allowed merge methods and required checks agree with the general settings.
 Before applying, the CLI must identify settings unavailable through the public
 API or unsupported by the target repository's plan and leave them unchanged
