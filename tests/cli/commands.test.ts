@@ -410,6 +410,13 @@ describe('public CLI commands', () => {
           files: ['frontend-project-structure.md'],
         },
         {
+          id: 'general-project-guidelines',
+          name: 'General project guidelines',
+          description: expect.any(String),
+          kind: 'guide',
+          files: ['general-project-guidelines.md'],
+        },
+        {
           id: 'github-repo-setup-profile',
           name: 'GitHub repository setup profile',
           description: expect.any(String),

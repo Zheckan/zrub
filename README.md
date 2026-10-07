@@ -5,7 +5,7 @@ code. Install resources into a project, or read their instructions for a
 one-time task without installing the documents.
 
 > **MVP.** This release includes interactive installation and read-once access
-> to four bundled resources. Later releases add a persistent installation
+> to five bundled resources. Later releases add a persistent installation
 > manifest, update and remove commands, global skills, and automated repository
 > setup. The catalog
 > will grow a lot.
@@ -69,6 +69,12 @@ and bunx.
   `docs/project-guides/frontend-project-structure.md` organizes a React
   codebase around thin pages, feature-owned product logic, reusable domain
   logic, and a shared UI layer.
+- **General project guidelines.**
+  `read general-project-guidelines` returns a framework-independent guide
+  for apps, browser extensions, workers, CLIs, and libraries. It covers
+  dependency boundaries, code organization, readability, naming, testing,
+  verification, and migration. Installation places it at
+  `docs/project-guides/general-project-guidelines.md`.
 - **GitHub repository setup profile.**
   `read github-repo-setup-profile` returns a one-time agent runbook that
   applies this project's standard GitHub settings, the `main-protection`

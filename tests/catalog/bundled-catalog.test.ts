@@ -55,6 +55,17 @@ describe('bundled catalog', () => {
         ],
       },
       {
+        id: 'general-project-guidelines',
+        kind: 'guide',
+        files: [
+          {
+            source: 'general-project-guidelines.md',
+            destination: 'docs/project-guides/general-project-guidelines.md',
+            onExisting: undefined,
+          },
+        ],
+      },
+      {
         id: 'github-repo-setup-profile',
         kind: 'guide',
         files: [

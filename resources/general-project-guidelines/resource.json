@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "general-project-guidelines",
+  "name": "General project guidelines",
+  "description": "Framework-independent architecture and engineering conventions for apps, extensions, workers, CLIs, and libraries: dependency boundaries, code organization, readability, naming, testing, verification, and migration.",
+  "kind": "guide",
+  "files": [
+    {
+      "source": "general-project-guidelines.md",
+      "destination": "docs/project-guides/general-project-guidelines.md"
+    }
+  ]
+}

@@ -24,6 +24,8 @@ const requiredEntries = [
   'package/resources/github-repo-setup-profile/github-repo-setup-profile.md',
   'package/resources/typescript-ci-setup/resource.json',
   'package/resources/typescript-ci-setup/typescript-ci-setup.md',
+  'package/resources/general-project-guidelines/resource.json',
+  'package/resources/general-project-guidelines/general-project-guidelines.md',
 ];
 const excludedPrefixes = [
   'package/src/',
