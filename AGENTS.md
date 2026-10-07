@@ -40,10 +40,12 @@ is ambiguous:
 - Separate content type from how a reader uses it. The current catalog kinds
   are `guide`, `prompt`, `template`, `example`, and `code`. A one-off runbook
   can be a `guide`; its purpose does not imply installation into a project.
-- The current CLI installs file mappings. Read-once access for every document
-  and global agent skill support are future capabilities. When changing these
-  behaviors, read `docs/future-ideas.md` and design the relevant flow before
-  changing the metadata or installer.
+- The CLI installs file mappings or returns resources through `list` and
+  `read <resource-id>`, with optional `--json` output. Reading must leave the
+  target project unchanged and preserve complete source contents. Read
+  `docs/read-once-design.md` when changing these commands.
+- Global agent skill support is future work. Read `docs/future-ideas.md` and
+  design that flow before changing metadata or the installer.
 - When adding a catalog resource, include its metadata and payloads, update
   the README, catalog expectations, and package-content checks, and run
   `pnpm package:check` in addition to the required verification commands.

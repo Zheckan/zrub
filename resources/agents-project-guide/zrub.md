@@ -12,15 +12,22 @@ self-service manual for maintaining the guides installed in this project.
 
 ## Tasks
 
+- Discover instructions for a one-time task: run `npx @zheckan/zrub@latest list`.
+  Receive a resource with `npx @zheckan/zrub@latest read <resource-id>` and
+  follow its instructions for the requested task. Add `--json` for structured
+  output. These commands leave the target project unchanged; the agent
+  performs the described work.
 - Reinstall, update, or add guides: run `npx @zheckan/zrub@latest`. The managed
   `AGENTS.md` section is preserved byte-for-byte; every other write is shown
   for review first.
 - Re-apply the GitHub repository standard (settings, the `main-protection`
   branch ruleset, `release-tags` protection): read and follow the one-off
-  runbook from its source without copying it into the project:
+  runbook with `npx @zheckan/zrub@latest read github-repo-setup-profile` without
+  copying it into the project. Source:
   https://github.com/Zheckan/zrub/blob/main/resources/github-repo-setup-profile/github-repo-setup-profile.md
 - Create or restructure TypeScript CI: follow the separate CI guide to create
-  or update the project's workflow file. Source of truth:
+  or update the project's workflow file. Receive it with
+  `npx @zheckan/zrub@latest read typescript-ci-setup`. Source:
   https://github.com/Zheckan/zrub/blob/main/resources/typescript-ci-setup/typescript-ci-setup.md
 - Record findings in `docs/findings.md`.
 

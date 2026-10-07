@@ -3,27 +3,9 @@
 These ideas are intentionally outside the current MVP. Each requires its own
 design and approval before implementation.
 
-## Read-once access for every document
-
-Every catalog document should support a read-once mode that returns its
-contents to the user or agent without installing a copy in the target project.
-Make this available to all documents, including project guides, prompts,
-setup runbooks, and document templates. It must not be a special case limited
-to GitHub setup or another selected resource.
-
-Reading a document must not create project files, managed blocks, or an
-installation record. Keep reading separate from executing its instructions:
-a user can read a setup runbook without authorizing the remote changes it
-describes. If the user asks the agent to apply instructions, use the normal
-authorization and review flow for those actions.
-
-GitHub repository setup is a one-off use of this general mode. Read and follow
-the runbook from its source without adding it to the project. CI setup uses a
-separate guide and produces a project-specific workflow file such as
-`.github/workflows/ci.yml`; that output is distinct from installing the guide.
-
-Design how users and agents discover, select, and retrieve a document before
-implementing this mode. The existing CLI currently supports file installation.
+Read-once access for every resource is implemented through `list` and `read`.
+See [the read-once design](read-once-design.md) and the README for current
+behavior. The ideas below remain future work.
 
 ## Global agent skills
 

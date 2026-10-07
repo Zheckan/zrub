@@ -18,6 +18,12 @@ findings in the ledger below.
 
 ## FINDINGS
 
+- Catalog containment must check physical paths as well as lexical paths. A
+  nested directory symlink can point a regular payload file outside its
+  resource root; symlinked metadata must also be rejected before reading it.
+- Read-once CLI commands include `existingSource` payloads so agents receive
+  both agent-template variants. They do not choose a variant based on the
+  target project's files.
 - The root `AGENTS.md` guides contributors who add resources to Zrub.
   `resources/agents-project-guide/zrub.md` is a payload delivered to other
   projects and holds their installation maintenance instructions.
