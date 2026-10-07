@@ -5,9 +5,9 @@ configuration so the same settings, branch protection, and release-tag rules
 are applied every time without reviewing other repositories first. Follow it
 top to bottom and treat every remote change as one reviewed installation.
 
-The runbook changes remote configuration only. It never writes files into the
-target repository. A reader that only needs the result can stop after the
-verification step.
+This is a one-off setup runbook. Read and follow it from its source without
+copying the document into the target project. It changes remote configuration
+only. A reader that only needs the result can stop after the verification step.
 
 ## Safety rules for the agent
 
@@ -67,6 +67,11 @@ Notes:
   separate decision made per repository.
 
 ## 2. Derive required status-check names
+
+When creating or restructuring TypeScript CI, first follow the
+[TypeScript CI setup guide](https://github.com/Zheckan/zrub/blob/main/resources/typescript-ci-setup/typescript-ci-setup.md).
+Confirm whether the user prefers separate check results or lower runner usage.
+Its two layouts produce different required check names.
 
 Required status checks must match workflow check names exactly. List the check
 names the latest commit produced:

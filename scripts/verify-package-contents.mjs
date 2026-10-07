@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -11,6 +11,8 @@ const requiredEntries = [
   'package/README.md',
   'package/LICENSE',
   'package/dist/cli.js',
+  'package/dist/cli/commands.js',
+  'package/dist/catalog/resource-content.js',
   'package/resources/frontend-project-structure/resource.json',
   'package/resources/frontend-project-structure/frontend-project-structure.md',
   'package/resources/agents-project-guide/resource.json',
@@ -20,6 +22,10 @@ const requiredEntries = [
   'package/resources/agents-project-guide/zrub.md',
   'package/resources/github-repo-setup-profile/resource.json',
   'package/resources/github-repo-setup-profile/github-repo-setup-profile.md',
+  'package/resources/typescript-ci-setup/resource.json',
+  'package/resources/typescript-ci-setup/typescript-ci-setup.md',
+  'package/resources/general-project-guidelines/resource.json',
+  'package/resources/general-project-guidelines/general-project-guidelines.md',
 ];
 const excludedPrefixes = [
   'package/src/',
@@ -86,7 +92,41 @@ try {
   });
   assert.equal(packedPackage.engines?.node, '>=22');
 
-  process.stdout.write('Packed package contents are valid.\n');
+  run('tar', ['-xzf', tarballPath, '-C', temporaryDirectory]);
+  const targetDirectory = path.join(temporaryDirectory, 'project');
+  await mkdir(targetDirectory);
+  const packedCli = path.join(temporaryDirectory, 'package/dist/cli.js');
+  const catalog = JSON.parse(
+    run(process.execPath, [packedCli, 'list', '--json'], {
+      cwd: targetDirectory,
+    }),
+  );
+  assert.ok(catalog.some(({ id }) => id === 'typescript-ci-setup'));
+  const instructions = JSON.parse(
+    run(
+      process.execPath,
+      [packedCli, 'read', 'typescript-ci-setup', '--json'],
+      {
+        cwd: targetDirectory,
+      },
+    ),
+  );
+  assert.equal(instructions.id, 'typescript-ci-setup');
+  assert.deepEqual(instructions.files, [
+    {
+      source: 'typescript-ci-setup.md',
+      content: run('tar', [
+        '-xOf',
+        tarballPath,
+        'package/resources/typescript-ci-setup/typescript-ci-setup.md',
+      ]),
+    },
+  ]);
+  assert.deepEqual(await readdir(targetDirectory), []);
+
+  process.stdout.write(
+    'Packed package contents and read-once commands are valid.\n',
+  );
 } finally {
   await rm(temporaryDirectory, { recursive: true, force: true });
 }

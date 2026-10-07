@@ -1,4 +1,4 @@
-import { lstat, readFile, readdir } from 'node:fs/promises';
+import { lstat, readFile, readdir, realpath } from 'node:fs/promises';
 import path from 'node:path';
 
 import { isMissingPath } from '../errors.js';
@@ -16,6 +16,11 @@ async function readDefinition(
   let source: string;
 
   try {
+    if (!(await lstat(metadataPath)).isFile()) {
+      throw new Error(
+        `Resource metadata must be a regular file: ${metadataPath}`,
+      );
+    }
     source = await readFile(metadataPath, 'utf8');
   } catch (error) {
     if (isMissingPath(error)) {
@@ -36,7 +41,7 @@ async function readDefinition(
   return validateResourceDefinition(input);
 }
 
-async function resolvePayloadPath(
+export async function resolvePayloadPath(
   resourceDirectory: string,
   source: string,
 ): Promise<string> {
@@ -59,6 +64,19 @@ async function resolvePayloadPath(
   });
   if (!stats.isFile()) {
     throw new Error(`Payload must be a regular file: ${sourcePath}`);
+  }
+
+  const [physicalRoot, physicalSource] = await Promise.all([
+    realpath(resourceDirectory),
+    realpath(sourcePath),
+  ]);
+  const physicalRelative = path.relative(physicalRoot, physicalSource);
+  if (
+    physicalRelative === '..' ||
+    physicalRelative.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(physicalRelative)
+  ) {
+    throw new Error(`Payload escapes resource directory: ${source}`);
   }
 
   return sourcePath;

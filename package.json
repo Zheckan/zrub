@@ -1,6 +1,6 @@
 {
   "name": "@zheckan/zrub",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Install reusable engineering guides, prompts, templates, examples, and code into projects.",
   "keywords": [
     "cli",
