@@ -40,6 +40,19 @@ is ambiguous:
 - Separate content type from how a reader uses it. The current catalog kinds
   are `guide`, `prompt`, `template`, `example`, and `code`. A one-off runbook
   can be a `guide`; its purpose does not imply installation into a project.
+- Every resource must be discoverable and readable without installation.
+  This applies to GitHub setup, CI setup, project conventions, and future
+  resources. An agent may read a guide and perform its task without saving
+  the guide or changing `AGENTS.md`; creating the requested workflow or
+  changing repository settings is separate from installing instructions.
+- When adding conventions for ongoing work, include a conditional pointer in
+  the full and minimal agent templates that says when to consult the guide.
+  Use a local path when installed and a source link or `read <resource-id>`
+  command when it is not. Match the guide to the project: general project
+  guidelines apply to CLIs and other projects; the frontend guide applies
+  where its UI conventions fit. Preserve existing managed blocks; read the
+  conditional-link plan in `docs/future-ideas.md` before changing installation
+  or update behavior.
 - The CLI installs file mappings or returns resources through `list` and
   `read <resource-id>`, with optional `--json` output. Reading must leave the
   target project unchanged and preserve complete source contents. Read

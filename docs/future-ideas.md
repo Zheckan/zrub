@@ -5,7 +5,34 @@ design and approval before implementation.
 
 Read-once access for every resource is implemented through `list` and `read`.
 See [the read-once design](read-once-design.md) and the README for current
-behavior. The ideas below remain future work.
+behavior. Reading without installation is a general resource rule in the root
+`AGENTS.md`, including GitHub setup, CI setup, and project conventions. The
+ideas below remain future work.
+
+## Conditional project-guide links
+
+Installing a conventions guide currently copies its file but does not link
+it from the target project's `AGENTS.md`. The full and minimal agent templates
+link to CI and GitHub setup, but do not yet point to the frontend structure or
+general project guidelines.
+
+- Connect selected conventions guides to the project's agent instructions
+  with a short description of when each guide applies.
+- Use a local path for an installed guide and a source link or `read` command
+  for a guide used without installation.
+- Use the general project guidelines for CLI and other projects without a UI;
+  link to the frontend guide only when the project uses the conventions it
+  describes. Do not install both by default.
+- Include applicable links when creating a new `AGENTS.md`. For an existing
+  file, show the proposed additions in the installation review and preserve
+  project-specific instructions.
+- Keep the findings-ledger workflow available in both agent-template
+  variants. That workflow is already implemented.
+- Preserve existing managed blocks byte-for-byte on ordinary reinstallation.
+  Define an explicit update flow for adding links to a previously installed
+  block; changing a bundled template alone does not update it.
+- Verify guide links for new and existing projects, installation with only a
+  guide selected, and repeated installation.
 
 ## Global agent skills
 
