@@ -16,6 +16,25 @@ interface GroupDefinition {
 const GROUP_DEFINITIONS: GroupDefinition[] = [
   { kind: 'create', heading: 'CREATE', severity: 'normal' },
   { kind: 'prepend', heading: 'PREPEND', severity: 'normal' },
+  { kind: 'update', heading: 'UPDATE', severity: 'normal' },
+  { kind: 'track', heading: 'TRACK - CONTENTS PRESERVED', severity: 'normal' },
+  { kind: 'delete', heading: 'DELETE UNCHANGED FILE', severity: 'warning' },
+  {
+    kind: 'forget',
+    heading: 'FORGET TRACKING - CONTENTS PRESERVED',
+    severity: 'normal',
+  },
+  { kind: 'retain', heading: 'RETAIN', severity: 'normal' },
+  {
+    kind: 'local-edit-conflict',
+    heading: 'LOCAL EDITS - CHOICE REQUIRED',
+    severity: 'blocking',
+  },
+  {
+    kind: 'migration-conflict',
+    heading: 'MIGRATION - BLOCKING',
+    severity: 'blocking',
+  },
   {
     kind: 'replace-conflict',
     heading: 'REPLACE - CONFLICT',
@@ -55,7 +74,7 @@ export function formatPlanReview(
   plan: InstallationPlan,
   targetRoot: string,
 ): ReviewGroup[] {
-  return GROUP_DEFINITIONS.flatMap((definition) => {
+  const groups = GROUP_DEFINITIONS.flatMap((definition) => {
     const entries = plan.operations
       .filter((operation) => operation.kind === definition.kind)
       .map((operation) => formatEntry(operation, targetRoot));
@@ -70,4 +89,18 @@ export function formatPlanReview(
           },
         ];
   });
+  if (
+    plan.operations.some(
+      (operation) =>
+        'mapping' in operation ||
+        operation.kind === 'delete' ||
+        operation.kind === 'forget',
+    )
+  )
+    groups.push({
+      heading: 'TRACKING',
+      entries: ['zrub-lock.json: checkpoint completed changes.'],
+      severity: 'normal',
+    });
+  return groups;
 }

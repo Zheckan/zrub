@@ -12,6 +12,10 @@ export interface ReviewGroup {
 export interface UiPort {
   intro(title: string): void;
   selectResources(resources: LoadedResource[]): Promise<string[] | Cancelled>;
+  selectChanges(
+    message: string,
+    options: Array<{ value: string; label: string; hint: string }>,
+  ): Promise<string[] | Cancelled>;
   showReview(groups: ReviewGroup[]): void;
   confirm(message: string): Promise<boolean | Cancelled>;
   info(message: string): void;

@@ -1,12 +1,15 @@
 import { loadCatalog } from '../catalog/load-catalog.js';
 import { describeResource, readResource } from '../catalog/resource-content.js';
 import { asError } from '../errors.js';
+import { inspectInstallation } from '../installer/status.js';
 
 interface CommandDependencies {
   resourcesRoot: string;
   stdout(text: string): void;
   stderr(text: string): void;
   install(): Promise<number>;
+  manage(intent: 'update' | 'remove', resourceIds: string[]): Promise<number>;
+  targetRoot: string;
 }
 
 const HELP = `Zrub
@@ -15,6 +18,9 @@ Usage:
   zrub                              Interactive resource installation
   zrub list [--json]                 Discover resources and their source files
   zrub read <resource-id> [--json]    Receive instructions without installing them
+  zrub status [--json]               Inspect installed resources and local edits
+  zrub update [resource-id...]       Review updates from this CLI's bundled catalog
+  zrub remove <resource-id...>       Remove unchanged files or forget retained files
   zrub --help                       Show this help
 
 For a one-time task, list resources, read the matching resource, then follow the instructions.
@@ -28,7 +34,14 @@ Example:
 
 export async function runCommand(
   args: string[],
-  { resourcesRoot, stdout, stderr, install }: CommandDependencies,
+  {
+    resourcesRoot,
+    targetRoot,
+    stdout,
+    stderr,
+    install,
+    manage,
+  }: CommandDependencies,
 ): Promise<number> {
   try {
     if (args.length === 0) {
@@ -39,6 +52,35 @@ export async function runCommand(
       stdout(HELP);
       return 0;
     }
+
+    if (
+      args[0] === 'status' &&
+      (args.length === 1 || (args.length === 2 && args[1] === '--json'))
+    ) {
+      const status = await inspectInstallation(
+        await loadCatalog(resourcesRoot),
+        targetRoot,
+      );
+      stdout(
+        args[1] === '--json'
+          ? `${JSON.stringify(status, null, 2)}\n`
+          : status.resources.length === 0
+            ? 'No tracked installations.\n'
+            : status.resources
+                .map(
+                  ({ id, catalogMappings, files }) =>
+                    `${id}: bundled mappings ${catalogMappings}\n${files.map((file) => `  ${file.destination}: local ${file.local}, bundled ${file.catalog}, ${file.provenance}${file.source.kind === 'known' ? `, installed from ${file.source.package.version}` : ', source unknown'}`).join('\n')}`,
+                )
+                .join('\n\n') + '\n',
+      );
+      return 0;
+    }
+    if (
+      (args[0] === 'update' || args[0] === 'remove') &&
+      (args[0] !== 'remove' || args.length > 1) &&
+      args.slice(1).every((id) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id))
+    )
+      return await manage(args[0], args.slice(1));
 
     if (
       args[0] === 'list' &&

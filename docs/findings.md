@@ -38,7 +38,17 @@ findings in the ledger below.
   with 422 (`/rules/3: data matches no possible input`).
 - `schemaVersion` versions resource metadata, not guide content. The package
   version identifies the bundled catalog; individual resources have no version
-  field or installed-revision tracking.
+  field. `zrub-lock.json` records content hashes and package provenance per
+  installed mapping, including mixed versions after a partial update.
 - Full and minimal `AGENTS.md` templates are selected only on first
   installation. Reinstallation preserves the managed block byte-for-byte, so
   new guide links in a bundled template do not reach existing managed blocks.
+- `agents-project-guide` installs `docs/findings.md` as a standalone file,
+  without the managed-block policy used for `AGENTS.md`. Findings edits therefore
+  produce ordinary replacement conflicts when the resource is reinstalled.
+- Adopted existing files have `observed-existing` provenance and are preserved
+  by removal even when their contents match the recorded baseline. Only
+  unchanged standalone files with `written` provenance are eligible for deletion.
+- Manifest checkpoints follow payload writes. A failed checkpoint can leave an
+  untracked created file or an outdated baseline; retries review adoption rather
+  than assuming ownership. Earlier completed checkpoints survive later failures.

@@ -1,5 +1,7 @@
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
+import { operationFixture, emptyManifest } from '../helpers/operation.js';
 
 import { describe, expect, it } from 'vitest';
 
@@ -10,6 +12,7 @@ import type {
 } from '../../src/catalog/types.js';
 import {
   applyInstallationPlan,
+  atomicFileWriter,
   type FileWriter,
 } from '../../src/installer/apply-plan.js';
 import { wrapManagedBlock } from '../../src/installer/managed-block.js';
@@ -59,14 +62,22 @@ function operation(
   kind: InstallationOperationKind,
   nextContent?: string,
 ): InstallationOperation {
-  return {
+  let current: string | null = null;
+  try {
+    current = readFileSync(
+      path.join(targetRoot, 'target', `${name}.md`),
+      'utf8',
+    );
+  } catch {
+    /* Missing test destination. */
+  }
+  return operationFixture({
+    targetRoot: path.join(targetRoot, 'target'),
     resourceId: name,
-    sourcePath: path.join(targetRoot, 'catalog', `${name}.md`),
-    destinationPath: path.join(targetRoot, 'target', `${name}.md`),
     kind,
-    ...(nextContent === undefined ? {} : { nextContent }),
-    template: false,
-  };
+    current,
+    ...(nextContent === undefined ? {} : { content: nextContent }),
+  });
 }
 
 function plan(
@@ -76,6 +87,7 @@ function plan(
 ): InstallationPlan {
   return {
     targetRoot: path.join(targetRoot, 'target'),
+    manifest: emptyManifest(),
     operations,
     hasReplacementConflicts: operations.some(
       (item) => item.kind === 'replace-conflict',
@@ -90,6 +102,7 @@ describe('applyInstallationPlan', () => {
       await mkdir(path.join(directory, 'target'));
       let calls = 0;
       const writer: FileWriter = {
+        deleteFile: unlink,
         async writeAtomically() {
           calls += 1;
         },
@@ -148,6 +161,8 @@ describe('applyInstallationPlan', () => {
       await mkdir(targetRoot);
       const create = operation(directory, 'nested', 'create', 'Nested\n');
       create.destinationPath = path.join(targetRoot, 'docs/guides/nested.md');
+      if ('mapping' in create)
+        create.mapping.destination = 'docs/guides/nested.md';
 
       const result = await applyInstallationPlan(plan(directory, [create]));
 
@@ -166,6 +181,7 @@ describe('applyInstallationPlan', () => {
       const second = operation(directory, 'second', 'create', 'Second\n');
       const failure = new Error('forced writer failure');
       const writer: FileWriter = {
+        deleteFile: unlink,
         async writeAtomically(destinationPath, content) {
           if (destinationPath === second.destinationPath) {
             throw failure;
@@ -182,6 +198,8 @@ describe('applyInstallationPlan', () => {
 
       expect(result).toEqual({
         status: 'failed',
+        phase: 'payload',
+        untracked: [],
         completed: [first],
         failed: second,
         error: failure,
@@ -194,14 +212,9 @@ describe('applyInstallationPlan', () => {
       const targetRoot = path.join(directory, 'target');
       const conflictingDirectory = path.join(targetRoot, 'conflict.md');
       await mkdir(conflictingDirectory, { recursive: true });
-      const create = operation(directory, 'conflict', 'create', 'Content\n');
-
-      const result = await applyInstallationPlan(plan(directory, [create]));
-
-      expect(result).toMatchObject({
-        status: 'failed',
-        failed: create,
-      });
+      await expect(
+        atomicFileWriter.writeAtomically(conflictingDirectory, 'Content\n'),
+      ).rejects.toThrow();
       expect(await readdir(targetRoot)).toEqual(['conflict.md']);
     });
   });

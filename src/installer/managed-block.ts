@@ -13,8 +13,20 @@ export function managedMarkers(resourceId: string): {
   };
 }
 
-export function wrapManagedBlock(resourceId: string, content: string): string {
+export function wrapManagedBlock(resourceId: string, content: string): string;
+export function wrapManagedBlock(resourceId: string, content: Buffer): Buffer;
+export function wrapManagedBlock(
+  resourceId: string,
+  content: string | Buffer,
+): string | Buffer {
   const { start, end } = managedMarkers(resourceId);
+  if (Buffer.isBuffer(content))
+    return Buffer.concat([
+      Buffer.from(`${start}\n`),
+      content,
+      content.at(-1) === 10 ? Buffer.alloc(0) : Buffer.from('\n'),
+      Buffer.from(`${end}\n`),
+    ]);
   const normalized = content.endsWith('\n') ? content : `${content}\n`;
   return `${start}\n${normalized}${end}\n`;
 }

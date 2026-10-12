@@ -4,11 +4,8 @@
 code. Install resources into a project, or read their instructions for a
 one-time task without installing the documents.
 
-> **MVP.** This release includes interactive installation and read-once access
-> to five bundled resources. Later releases add a persistent installation
-> manifest, update and remove commands, global skills, and automated repository
-> setup. The catalog
-> will grow a lot.
+Install from five bundled resources, inspect tracked files, and review updates
+and removals. Global skills and automatic repository setup remain future work.
 
 Run one of these commands from the target project's root:
 
@@ -115,6 +112,56 @@ everything inside them byte-for-byte, including project notes and findings
 written by agents. The CLI reviews every write before asking for approval.
 Cancelling or picking nothing changes nothing.
 
+## Tracking, updates, and removal
+
+Installation records each approved mapping in project-root `zrub-lock.json`.
+Commit this file alongside your installed guides. It stores relative paths,
+exact-byte content hashes, the selected template source, and the Zrub package
+version that supplied each file. Existing matching files can be adopted through
+a reviewed tracking-only change. Existing managed blocks have unknown original
+source provenance when no earlier manifest exists.
+
+Run these commands from the target project's root:
+
+```sh
+pnpm dlx @zheckan/zrub@latest status
+pnpm dlx @zheckan/zrub@latest status --json
+pnpm dlx @zheckan/zrub@latest update
+pnpm dlx @zheckan/zrub@latest update general-project-guidelines
+pnpm dlx @zheckan/zrub@latest remove general-project-guidelines
+```
+
+`status` reports local edits, missing files, and bundled source changes without
+writing anything. It compares against the running CLI's bundled catalog and
+does not check npm for a newer release. A newer CLI with identical resource
+contents causes no file or manifest rewrite. `list` and `read` still discover
+and print resources without consulting or creating project tracking.
+
+`update` selects all tracked resources, or only the IDs supplied. Local edits
+stay intact by default; select individual edited files to replace before the
+single final review and confirmation. Recognized managed blocks stay intact,
+including when their bundled source changes. Review those changes manually
+with `read <resource-id>`. Changed destinations or installation policies block
+automatic migration rather than moving or replacing tracked content.
+
+`remove` requires explicit resource IDs. It deletes only unchanged standalone
+files written by Zrub. Modified files, adopted existing files, and managed
+blocks are retained; you can explicitly forget their tracking while preserving
+their contents. Directories stay in place. An empty manifest remains after the
+last tracked mapping is removed.
+
+Writes recheck reviewed contents and checkpoint tracking after each completed
+mapping. If a later operation fails, earlier changes and checkpoints remain.
+The CLI reports payload changes that succeeded without their checkpoint; inspect
+`status` and review a retry. This is not a transaction across files or an exact
+restoration mechanism. Preserve the reported changes when recovering from a
+failed run.
+
+An exclusive `.zrub-mutation.lock` prevents concurrent Zrub mutations. An
+interrupted process can leave the lock behind. Verify that no Zrub process is
+running before removing that specific lock and retrying. Files changed by an
+unrelated editor after the final precondition check remain a filesystem race.
+
 ## Resource catalog
 
 Publishable resources live in `resources/`. A resource is a self-contained
@@ -134,9 +181,10 @@ Documentation about developing this repository belongs in `docs/`, not in the
 publishable catalog.
 
 The package version identifies a bundled catalog release; `schemaVersion`
-identifies the metadata format. Individual resources currently have no version
-field or installed-revision tracking. The agent template variants and CI
-layouts are choices within resources, not separately versioned releases.
+identifies the metadata format. Resources have no separate version field;
+`zrub-lock.json` tracks installed content and package provenance per mapping.
+The agent template variants and CI layouts are choices within resources, not
+separately versioned releases.
 
 ## Development
 

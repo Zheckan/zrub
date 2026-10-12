@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readdir, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -13,6 +13,8 @@ const requiredEntries = [
   'package/dist/cli.js',
   'package/dist/cli/commands.js',
   'package/dist/catalog/resource-content.js',
+  'package/dist/installer/manifest.js',
+  'package/dist/installer/status.js',
   'package/resources/frontend-project-structure/resource.json',
   'package/resources/frontend-project-structure/frontend-project-structure.md',
   'package/resources/agents-project-guide/resource.json',
@@ -124,8 +126,53 @@ try {
   ]);
   assert.deepEqual(await readdir(targetDirectory), []);
 
+  assert.deepEqual(
+    JSON.parse(
+      run(process.execPath, [packedCli, 'status', '--json'], {
+        cwd: targetDirectory,
+      }),
+    ),
+    { resources: [] },
+  );
+  assert.deepEqual(await readdir(targetDirectory), []);
+  const packedRoot = path.join(temporaryDirectory, 'package');
+  run(process.execPath, [
+    '--input-type=module',
+    '-e',
+    `
+    import path from 'node:path';
+    import { pathToFileURL } from 'node:url';
+    const [packageRoot, targetRoot] = process.argv.slice(1);
+    const load = async (file) => import(pathToFileURL(path.join(packageRoot, 'dist', file)).href);
+    const { loadCatalog } = await load('catalog/load-catalog.js');
+    const { planInstallation } = await load('installer/plan-installation.js');
+    const { applyInstallationPlan } = await load('installer/apply-plan.js');
+    const resources = await loadCatalog(path.join(packageRoot, 'resources'));
+    const resource = resources.find((item) => item.id === 'general-project-guidelines');
+    const result = await applyInstallationPlan(await planInstallation([resource], targetRoot));
+    if (result.status !== 'completed') throw result.error;
+  `,
+    packedRoot,
+    targetDirectory,
+  ]);
+  const manifestPath = path.join(targetDirectory, 'zrub-lock.json');
+  const trackedBefore = await readFile(manifestPath, 'utf8');
+  const status = JSON.parse(
+    run(process.execPath, [packedCli, 'status', '--json'], {
+      cwd: targetDirectory,
+    }),
+  );
+  assert.equal(status.resources[0].id, 'general-project-guidelines');
+  assert.equal(status.resources[0].files[0].local, 'unchanged');
+  assert.equal(status.resources[0].files[0].catalog, 'unchanged');
+  assert.equal(
+    status.resources[0].files[0].source.package.version,
+    packedPackage.version,
+  );
+  assert.equal(await readFile(manifestPath, 'utf8'), trackedBefore);
+
   process.stdout.write(
-    'Packed package contents and read-once commands are valid.\n',
+    'Packed package contents, installation tracking, status, and read-once commands are valid.\n',
   );
 } finally {
   await rm(temporaryDirectory, { recursive: true, force: true });

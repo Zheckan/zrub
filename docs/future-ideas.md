@@ -9,6 +9,12 @@ behavior. Reading without installation is a general resource rule in the root
 `AGENTS.md`, including GitHub setup, CI setup, and project conventions. The
 ideas below remain future work.
 
+Project installation tracking, `status`, reviewed `update`, and conservative
+`remove` are implemented. See [the implementation plan](installation-manifest-plan.md)
+for the ownership and failure model. Exact restoration from an immutable package
+release, stronger crash recovery, mapping migrations, and automatic updates of
+editable managed blocks remain future work.
+
 ## Conditional project-guide links
 
 Installing a conventions guide currently copies its file but does not link
