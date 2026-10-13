@@ -49,6 +49,7 @@ async function createResource(
     destination,
     ...(managed ? { onExisting: 'managed-prepend-once' as const } : {}),
     ...(existingSourcePath === undefined ? {} : { existingSourcePath }),
+    ...(existingSource === undefined ? {} : { existingSource }),
   };
 
   return {
@@ -71,7 +72,7 @@ describe('planInstallation', () => {
 
       const plan = await planInstallation([resource], targetRoot);
 
-      expect(plan).toEqual({
+      expect(plan).toMatchObject({
         targetRoot,
         operations: [
           {
@@ -79,7 +80,7 @@ describe('planInstallation', () => {
             sourcePath: resource.files[0]?.sourcePath,
             destinationPath: path.join(targetRoot, 'docs/guide.md'),
             kind: 'create',
-            nextContent: '# New guide\n',
+            nextContent: Buffer.from('# New guide\n'),
             template: false,
           },
         ],
@@ -102,8 +103,11 @@ describe('planInstallation', () => {
 
       const plan = await planInstallation([resource], targetRoot);
 
-      expect(plan.operations[0]).toMatchObject({ kind: 'unchanged' });
-      expect(plan.operations[0]?.nextContent).toBeUndefined();
+      expect(plan.operations[0]).toMatchObject({
+        kind: 'track',
+        mapping: { provenance: 'observed-existing' },
+      });
+      expect(plan.operations[0]).not.toHaveProperty('nextContent');
       expect(plan.hasReplacementConflicts).toBe(false);
     });
   });
@@ -120,7 +124,7 @@ describe('planInstallation', () => {
 
       expect(plan.operations[0]).toMatchObject({
         kind: 'replace-conflict',
-        nextContent: '# New\n',
+        nextContent: Buffer.from('# New\n'),
       });
       expect(plan.hasReplacementConflicts).toBe(true);
       expect(plan.hasBlockingConflicts).toBe(false);
@@ -144,7 +148,9 @@ describe('planInstallation', () => {
 
       expect(plan.operations[0]).toMatchObject({
         kind: 'create',
-        nextContent: wrapManagedBlock('agents-project-guide', '## Findings\n'),
+        nextContent: Buffer.from(
+          wrapManagedBlock('agents-project-guide', '## Findings\n'),
+        ),
         template: true,
       });
     });
@@ -167,10 +173,12 @@ describe('planInstallation', () => {
 
       expect(plan.operations[0]).toMatchObject({
         kind: 'prepend',
-        nextContent: `${wrapManagedBlock(
-          'agents-project-guide',
-          '## Findings\n',
-        )}\n# Existing\n`,
+        nextContent: Buffer.from(
+          `${wrapManagedBlock(
+            'agents-project-guide',
+            '## Findings\n',
+          )}\n# Existing\n`,
+        ),
       });
     });
   });
@@ -193,10 +201,12 @@ describe('planInstallation', () => {
 
       expect(plan.operations[0]).toMatchObject({
         kind: 'prepend',
-        nextContent: `${wrapManagedBlock(
-          'agents-project-guide',
-          '## Installed by zrub\n',
-        )}\n# Existing\n`,
+        nextContent: Buffer.from(
+          `${wrapManagedBlock(
+            'agents-project-guide',
+            '## Installed by zrub\n',
+          )}\n# Existing\n`,
+        ),
       });
     });
   });
@@ -221,8 +231,11 @@ describe('planInstallation', () => {
 
       const plan = await planInstallation([resource], targetRoot);
 
-      expect(plan.operations[0]).toMatchObject({ kind: 'already-installed' });
-      expect(plan.operations[0]?.nextContent).toBeUndefined();
+      expect(plan.operations[0]).toMatchObject({
+        kind: 'track',
+        mapping: { source: { kind: 'unknown' } },
+      });
+      expect(plan.operations[0]).not.toHaveProperty('nextContent');
       expect(await readFile(destinationPath, 'utf8')).toBe(installed);
     });
   });

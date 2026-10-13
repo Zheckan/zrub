@@ -1,36 +1,51 @@
-export type InstallationOperationKind =
-  | 'create'
-  | 'prepend'
-  | 'replace-conflict'
-  | 'unchanged'
-  | 'already-installed'
-  | 'malformed-markers-conflict';
-
-export interface InstallationOperation {
+import type { InstalledMapping, ManifestSnapshot } from './manifest.js';
+interface OperationBase {
   resourceId: string;
   sourcePath: string;
   destinationPath: string;
-  kind: InstallationOperationKind;
-  nextContent?: string;
-  conflictReason?: string;
+  expectedHash: string | null;
   template: boolean;
+  conflictReason?: string;
 }
-
+export type InstallationOperation = OperationBase &
+  (
+    | {
+        kind:
+          | 'create'
+          | 'prepend'
+          | 'replace-conflict'
+          | 'update'
+          | 'local-edit-conflict';
+        nextContent: string | Buffer;
+        mapping: InstalledMapping;
+      }
+    | { kind: 'track'; mapping: InstalledMapping }
+    | {
+        kind:
+          | 'delete'
+          | 'forget'
+          | 'unchanged'
+          | 'already-installed'
+          | 'malformed-markers-conflict'
+          | 'retain'
+          | 'migration-conflict';
+      }
+  );
+export type InstallationOperationKind = InstallationOperation['kind'];
 export interface InstallationPlan {
   targetRoot: string;
+  manifest: ManifestSnapshot;
   operations: InstallationOperation[];
   hasReplacementConflicts: boolean;
   hasBlockingConflicts: boolean;
 }
-
 export type ExecutionResult =
-  | {
-      status: 'completed';
-      completed: InstallationOperation[];
-    }
+  | { status: 'completed'; completed: InstallationOperation[] }
   | {
       status: 'failed';
+      phase: 'payload' | 'checkpoint' | 'precondition';
       completed: InstallationOperation[];
+      untracked: InstallationOperation[];
       failed: InstallationOperation;
       error: Error;
     };

@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { operationFixture, emptyManifest } from '../helpers/operation.js';
 
 import { describe, expect, it } from 'vitest';
 
@@ -15,14 +16,13 @@ function operation(
   name: string,
   conflictReason?: string,
 ): InstallationOperation {
-  return {
+  return operationFixture({
+    targetRoot,
     resourceId: name,
-    sourcePath: `/catalog/${name}.md`,
-    destinationPath: path.join(targetRoot, 'docs', `${name}.md`),
     kind,
+    destination: `docs/${name}.md`,
     ...(conflictReason === undefined ? {} : { conflictReason }),
-    template: false,
-  };
+  });
 }
 
 describe('formatPlanReview', () => {
@@ -43,6 +43,7 @@ describe('formatPlanReview', () => {
     ];
     const plan: InstallationPlan = {
       targetRoot,
+      manifest: emptyManifest(),
       operations,
       hasReplacementConflicts: true,
       hasBlockingConflicts: true,
@@ -79,6 +80,11 @@ describe('formatPlanReview', () => {
         entries: ['[malformed] docs/malformed.md - Expected one end marker'],
         severity: 'blocking',
       },
+      {
+        heading: 'TRACKING',
+        entries: ['zrub-lock.json: checkpoint completed changes.'],
+        severity: 'normal',
+      },
     ]);
   });
 
@@ -86,6 +92,7 @@ describe('formatPlanReview', () => {
     const targetRoot = path.resolve('/project');
     const plan: InstallationPlan = {
       targetRoot,
+      manifest: emptyManifest(),
       operations: [operation(targetRoot, 'create', 'created')],
       hasReplacementConflicts: false,
       hasBlockingConflicts: false,
@@ -93,7 +100,7 @@ describe('formatPlanReview', () => {
 
     const groups = formatPlanReview(plan, targetRoot);
 
-    expect(groups).toHaveLength(1);
+    expect(groups).toHaveLength(2);
     expect(groups[0]?.entries[0]).not.toContain('\\');
   });
 });

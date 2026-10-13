@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import {
   cp,
   mkdir,
@@ -13,6 +13,9 @@ import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { withTempDirectory } from '../helpers/temp-project.js';
+import { loadCatalog } from '../../src/catalog/load-catalog.js';
+import { planInstallation } from '../../src/installer/plan-installation.js';
+import { applyInstallationPlan } from '../../src/installer/apply-plan.js';
 
 const repositoryRoot = fileURLToPath(new URL('../..', import.meta.url));
 const cliPath = path.join(repositoryRoot, 'dist/cli.js');
@@ -36,7 +39,229 @@ function runCommand(args: string[], cwd: string, entryPoint = cliPath) {
   });
 }
 
+async function runInteractive(
+  args: string[],
+  cwd: string,
+  entryPoint: string,
+  answers: Array<{ prompt: string; keys: string[] }>,
+) {
+  return new Promise<{ status: number | null; stdout: string; stderr: string }>(
+    (resolve, reject) => {
+      const child = spawn(process.execPath, [entryPoint, ...args], {
+        cwd,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      let stdout = '';
+      let stderr = '';
+      let next = 0;
+      const timeout = setTimeout(() => {
+        child.kill('SIGKILL');
+        reject(new Error(`CLI prompt timed out: ${stdout}\n${stderr}`));
+      }, 10000);
+      child.stdout.on('data', (chunk) => {
+        stdout += String(chunk);
+        const answer = answers[next];
+        if (answer && stdout.includes(answer.prompt)) {
+          const answerIndex = next++;
+          void (async () => {
+            for (const key of answer.keys) {
+              child.stdin.write(key);
+              await new Promise((done) => setTimeout(done, 15));
+            }
+            if (answerIndex === answers.length - 1) child.stdin.end();
+          })();
+        }
+      });
+      child.stderr.on('data', (chunk) => {
+        stderr += String(chunk);
+      });
+      child.on('error', (error) => {
+        clearTimeout(timeout);
+        reject(error);
+      });
+      child.on('close', (status) => {
+        clearTimeout(timeout);
+        resolve({ status, stdout, stderr });
+      });
+    },
+  );
+}
+
 describe('public CLI commands', () => {
+  it('fails status closed on malformed tracking while list and read remain independent', async () => {
+    await withTempDirectory(async (targetRoot) => {
+      const manifestPath = path.join(targetRoot, 'zrub-lock.json');
+      await writeFile(manifestPath, '{broken');
+      const status = runCommand(['status', '--json'], targetRoot);
+      expect(status.status).toBe(1);
+      expect(status.stdout).toBe('');
+      expect(status.stderr).toContain('Invalid zrub-lock.json');
+      const catalog = runCommand(['list', '--json'], targetRoot);
+      expect(catalog.status).toBe(0);
+      expect(
+        JSON.parse(catalog.stdout).some(
+          (resource: { id: string }) =>
+            resource.id === 'general-project-guidelines',
+        ),
+      ).toBe(true);
+      const instructions = runCommand(
+        ['read', 'general-project-guidelines', '--json'],
+        targetRoot,
+      );
+      expect(instructions.status).toBe(0);
+      expect(JSON.parse(instructions.stdout)).toMatchObject({
+        id: 'general-project-guidelines',
+        files: [{ source: 'general-project-guidelines.md' }],
+      });
+      expect(await readFile(manifestPath, 'utf8')).toBe('{broken');
+      expect(await readdir(targetRoot)).toEqual(['zrub-lock.json']);
+    });
+  });
+
+  it('reviews edits, preserves them by default, and executes selected updates and removals through the compiled CLI', async () => {
+    await withTempDirectory(async (directory) => {
+      const appRoot = path.join(directory, 'app');
+      const resourcesRoot = path.join(appRoot, 'resources');
+      const targetRoot = path.join(directory, 'project');
+      await mkdir(targetRoot);
+      await cp(path.join(repositoryRoot, 'dist'), path.join(appRoot, 'dist'), {
+        recursive: true,
+      });
+      await symlink(
+        path.join(repositoryRoot, 'node_modules'),
+        path.join(appRoot, 'node_modules'),
+        'dir',
+      );
+      await writeFile(
+        path.join(appRoot, 'package.json'),
+        '{"name":"@zheckan/zrub","version":"0.2.0","type":"module"}',
+      );
+      const resourceRoot = path.join(resourcesRoot, 'guide');
+      await mkdir(resourceRoot, { recursive: true });
+      const source = path.join(resourceRoot, 'guide.md');
+      await writeFile(source, 'old guide\n');
+      await writeFile(
+        path.join(resourceRoot, 'resource.json'),
+        JSON.stringify({
+          schemaVersion: 1,
+          id: 'guide',
+          name: 'Guide',
+          description: 'A guide.',
+          kind: 'guide',
+          files: [{ source: 'guide.md', destination: 'guide.md' }],
+        }),
+      );
+      const resources = await loadCatalog(resourcesRoot);
+      await applyInstallationPlan(
+        await planInstallation(resources, targetRoot, {
+          release: { name: '@zheckan/zrub', version: '0.2.0' },
+        }),
+      );
+      await writeFile(source, 'new guide\n');
+      await writeFile(
+        path.join(appRoot, 'package.json'),
+        '{"name":"@zheckan/zrub","version":"0.3.0","type":"module"}',
+      );
+      await writeFile(path.join(targetRoot, 'guide.md'), 'my notes\n');
+      const entryPoint = path.join(appRoot, 'dist/cli.js');
+      const before = await readFile(
+        path.join(targetRoot, 'zrub-lock.json'),
+        'utf8',
+      );
+      const preserved = await runInteractive(
+        ['update'],
+        targetRoot,
+        entryPoint,
+        [
+          { prompt: 'Select edited files', keys: ['\r'] },
+          { prompt: 'Apply this update plan?', keys: ['\r'] },
+        ],
+      );
+      expect(preserved.status).toBe(0);
+      expect(preserved.stdout).toContain('RETAIN');
+      expect(await readFile(path.join(targetRoot, 'guide.md'), 'utf8')).toBe(
+        'my notes\n',
+      );
+      expect(
+        await readFile(path.join(targetRoot, 'zrub-lock.json'), 'utf8'),
+      ).toBe(before);
+      const declined = await runInteractive(
+        ['update', 'guide'],
+        targetRoot,
+        entryPoint,
+        [
+          { prompt: 'Select edited files', keys: [' ', '\r'] },
+          { prompt: 'Apply this update plan?', keys: ['n', '\r'] },
+        ],
+      );
+      expect(declined.status).toBe(0);
+      expect(declined.stdout).toContain('No changes were made');
+      expect(await readFile(path.join(targetRoot, 'guide.md'), 'utf8')).toBe(
+        'my notes\n',
+      );
+      expect(
+        await readFile(path.join(targetRoot, 'zrub-lock.json'), 'utf8'),
+      ).toBe(before);
+      const replaced = await runInteractive(
+        ['update', 'guide'],
+        targetRoot,
+        entryPoint,
+        [
+          { prompt: 'Select edited files', keys: [' ', '\r'] },
+          { prompt: 'Apply this update plan?', keys: ['\r'] },
+        ],
+      );
+      expect(replaced.status).toBe(0);
+      expect(replaced.stdout).toContain('REPLACE - CONFLICT');
+      expect(await readFile(path.join(targetRoot, 'guide.md'), 'utf8')).toBe(
+        'new guide\n',
+      );
+      const status = runCommand(['status', '--json'], targetRoot, entryPoint);
+      expect(status.status).toBe(0);
+      expect(JSON.parse(status.stdout)).toMatchObject({
+        resources: [
+          {
+            files: [
+              {
+                local: 'unchanged',
+                catalog: 'unchanged',
+                source: { package: { version: '0.3.0' } },
+              },
+            ],
+          },
+        ],
+      });
+      const invalid = runCommand(
+        ['remove', 'guide', 'unknown'],
+        targetRoot,
+        entryPoint,
+      );
+      expect(invalid.status).toBe(1);
+      expect(invalid.stdout).toContain('Resource is not tracked');
+      expect(await readFile(path.join(targetRoot, 'guide.md'), 'utf8')).toBe(
+        'new guide\n',
+      );
+      const removed = await runInteractive(
+        ['remove', 'guide'],
+        targetRoot,
+        entryPoint,
+        [{ prompt: 'Apply this remove plan?', keys: ['\r'] }],
+      );
+      expect(removed.status).toBe(0);
+      expect(removed.stdout).toContain('DELETE UNCHANGED FILE');
+      expect(await readdir(targetRoot)).toEqual(['zrub-lock.json']);
+    });
+  }, 20000);
+
+  it('reports absent tracking through status without creating project state', async () => {
+    await withTempDirectory(async (targetRoot) => {
+      const result = runCommand(['status', '--json'], targetRoot);
+      expect(result.status).toBe(0);
+      expect(JSON.parse(result.stdout)).toEqual({ resources: [] });
+      expect(await readdir(targetRoot)).toEqual([]);
+    });
+  });
+
   it('keeps interactive installation as the no-argument default', async () => {
     await withTempDirectory(async (targetRoot) => {
       const result = spawnSync(process.execPath, [cliPath], {

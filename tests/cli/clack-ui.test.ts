@@ -93,7 +93,7 @@ describe('createClackUi', () => {
     expect(clack.note).toHaveBeenCalledTimes(3);
     expect(clack.note).toHaveBeenCalledWith('two', 'REPLACE - CONFLICT');
     expect(clack.log.warn).toHaveBeenCalledWith(
-      'The review contains replacement conflicts.',
+      'The review contains replacements or deletions.',
     );
     expect(clack.log.error).toHaveBeenCalledWith(
       'The review contains blocking conflicts.',

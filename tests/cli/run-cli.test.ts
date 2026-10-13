@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { operationFixture, emptyManifest } from '../helpers/operation.js';
 
 import { describe, expect, it, vi } from 'vitest';
 
@@ -35,16 +36,7 @@ function operation(
   kind: InstallationOperation['kind'] = 'create',
   template = false,
 ): InstallationOperation {
-  return {
-    resourceId,
-    sourcePath: `/catalog/${resourceId}/file.md`,
-    destinationPath: path.join(targetRoot, `${resourceId}.md`),
-    kind,
-    ...(kind === 'create' || kind === 'prepend' || kind === 'replace-conflict'
-      ? { nextContent: 'content\n' }
-      : {}),
-    template,
-  };
+  return operationFixture({ targetRoot, resourceId, kind, template });
 }
 
 function installationPlan(
@@ -54,6 +46,7 @@ function installationPlan(
   return {
     targetRoot,
     operations,
+    manifest: emptyManifest(),
     hasReplacementConflicts: options.replacement ?? false,
     hasBlockingConflicts: options.blocking ?? false,
   };
@@ -74,6 +67,10 @@ class RecordingUi implements UiPort {
   async selectResources(): Promise<string[] | Cancelled> {
     this.events.push('select');
     return this.selection;
+  }
+
+  async selectChanges(): Promise<string[] | Cancelled> {
+    return [];
   }
 
   showReview(groups: ReviewGroup[]): void {
@@ -255,6 +252,8 @@ describe('runCli', () => {
     const second = operation('second');
     const result: ExecutionResult = {
       status: 'failed',
+      phase: 'payload',
+      untracked: [],
       completed: [first],
       failed: second,
       error: new Error('disk full'),

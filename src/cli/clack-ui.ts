@@ -71,11 +71,19 @@ export function createClackUi(clack = defaultClack): UiPort {
       }
 
       if (groups.some((group) => group.severity === 'warning')) {
-        clack.log.warn('The review contains replacement conflicts.');
+        clack.log.warn('The review contains replacements or deletions.');
       }
       if (groups.some((group) => group.severity === 'blocking')) {
         clack.log.error('The review contains blocking conflicts.');
       }
+    },
+    async selectChanges(message, options) {
+      const selection = await clack.multiselect({
+        message,
+        required: false,
+        options,
+      });
+      return clack.isCancel(selection) ? CANCELLED : (selection as string[]);
     },
     async confirm(message) {
       const confirmation = await clack.confirm({ message });
