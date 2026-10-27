@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "github-repo-setup-profile",
   "name": "GitHub repository setup profile",
-  "description": "A runbook that applies this project's standard GitHub settings, branch protection rulesets, and release-tag protection to a new repository.",
+  "description": "A runbook that applies this project's standard GitHub settings, branch protection rulesets, release-tag protection, and shared labels.",
   "kind": "guide",
   "files": [
     {

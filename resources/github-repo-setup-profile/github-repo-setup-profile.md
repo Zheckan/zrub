@@ -1,9 +1,10 @@
 # GitHub Repository Setup Profile
 
-This runbook sets up a new GitHub repository with this project's standard
-configuration so the same settings, branch protection, and release-tag rules
-are applied every time without reviewing other repositories first. Follow it
-top to bottom and treat every remote change as one reviewed installation.
+Use this runbook to apply this project's GitHub settings, branch protection,
+release-tag protection, and shared labels. For a new repository, follow the
+steps in order. For a label-only update, follow step 5 and the label
+verification in step 6. Keep other settings unchanged. Apply the safety rules
+to either path.
 
 This is a one-off setup runbook. Read and follow it from its source without
 copying the document into the target project. It changes remote configuration
@@ -12,7 +13,8 @@ only. A reader that only needs the result can stop after the verification step.
 ## Safety rules for the agent
 
 1. Read the current state first and show the complete plan before any write:
-   the repository-settings diff and the rulesets to create or update.
+   the repository-settings diff, the rulesets to create or update, and the
+   label source with every label to create, update, rename, or delete.
 2. Check for existing rulesets with the same name. Update them instead of
    creating duplicates, and never delete a ruleset that is not part of this
    profile.
@@ -32,7 +34,8 @@ gh repo view --json nameWithOwner,defaultBranchRef,isTemplate \
   --jq '.nameWithOwner + " " + .defaultBranchRef.name + " template=" + (.isTemplate|tostring)'
 ```
 
-The authenticated account must have repository administration access. Replace
+For the full setup, the authenticated account must have repository
+administration access. A label-only update requires write access. Replace
 `{owner}` and `{repo}` with the values from `nameWithOwner`, and `{branch}`
 with the default branch.
 
@@ -179,7 +182,58 @@ EOF
 
 Apply the same existing-name check as in step 3.
 
-## 5. Verify and report
+## 5. Copy shared labels
+
+Use `Cenoir-Studios/.github` as this profile's label source. If the user names
+another source repository, use that repository instead. Read both label sets:
+
+```sh
+label_source='Cenoir-Studios/.github'
+label_target='{owner}/{repo}'
+gh api "repos/$label_source/labels?per_page=100" --paginate --slurp \
+	--jq 'add | map({name, color, description}) | sort_by(.name)'
+gh api "repos/$label_target/labels?per_page=100" --paginate --slurp \
+	--jq 'add | map({id, name, color, description}) | sort_by(.name)'
+```
+
+Match the target label set to the source exactly. Compare names without regard
+to case when identifying existing labels. List missing labels to create,
+colors or descriptions to update, case-only renames, and target-only labels
+to delete. Include the source repository and the complete label diff in the
+plan required by the safety rules.
+
+Deleting a label also removes its issue and pull-request assignments. Inspect
+those assignments for every planned deletion and include affected items in
+the plan.
+
+If the reviewed label sets change before the copy, refresh the plan before
+applying it. After confirmation, copy the labels:
+
+```sh
+gh label clone "$label_source" --repo "$label_target" --force
+```
+
+`--force` updates matching labels to the source colors and descriptions. The
+copy command leaves target-only labels in place. After the copy succeeds,
+apply any planned case-only renames with `gh label edit --name`. Then delete
+each target-only label listed in the confirmed plan:
+
+```sh
+label_name='label from the confirmed deletion list'
+label_path=$(jq -rn --arg name "$label_name" '$name | @uri')
+gh api --method DELETE "repos/$label_target/labels/$label_path"
+```
+
+Encode the label name as shown so spaces and other URL characters remain part
+of the label name. See the [GitHub CLI label-copy reference](https://cli.github.com/manual/gh_label_clone)
+and the [GitHub label API](https://docs.github.com/en/rest/issues/labels#delete-a-label).
+
+Repeat this step when you want to copy later source changes. Personal accounts
+have no shared label inheritance. Organization defaults apply only to new
+repositories and do not update existing repositories. See
+[organization default labels](https://docs.github.com/en/organizations/managing-organization-settings/managing-default-labels-for-repositories-in-your-organization).
+
+## 6. Verify and report
 
 Read back the applied state:
 
@@ -189,6 +243,8 @@ gh api repos/{owner}/{repo} \
 gh api repos/{owner}/{repo}/rulesets --jq '.[] | {name, enforcement, target}'
 gh api repos/{owner}/{repo}/rules/branches/{branch} \
   --jq '.[] | {rule: .type, parameters: .parameters}'
+gh api 'repos/{owner}/{repo}/labels?per_page=100' --paginate --slurp \
+	--jq 'add | map({id, name, color, description}) | sort_by(.name)'
 ```
 
 Report one table with the repository settings, each ruleset with its
@@ -196,7 +252,15 @@ enforcement state, and the effective rules on the default branch. Confirm that
 no duplicate rulesets were created and state which steps, if any, remain
 manual.
 
-## 6. Settings without a public API (manual)
+Verify that the source and target have the same label names, colors, and
+descriptions, with no extra or missing labels. Ignore case only when comparing
+hexadecimal colors. Check that each retained label keeps its ID. Report the
+source repository, labels created, updated, renamed, or deleted, affected
+assignments, and any failures.
+
+For a label-only update, read back only the labels and report their results.
+
+## 7. Settings without a public API (manual)
 
 These stay unchanged and require the repository settings page:
 
@@ -206,7 +270,7 @@ These stay unchanged and require the repository settings page:
 - Automatically close issues linked to merged pull requests.
 - Do not include Git LFS objects in source archives.
 
-## 7. Out of scope
+## 8. Out of scope
 
 - Automated application of this profile through the CLI, including staged
   remote actions and a dedicated confirmation flow: deferred. See
