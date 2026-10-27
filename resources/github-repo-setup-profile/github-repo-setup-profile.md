@@ -14,7 +14,7 @@ only. A reader that only needs the result can stop after the verification step.
 
 1. Read the current state first and show the complete plan before any write:
    the repository-settings diff, the rulesets to create or update, and the
-   label source with every label to create or update.
+   label source with every label to create, update, rename, or delete.
 2. Check for existing rulesets with the same name. Update them instead of
    creating duplicates, and never delete a ruleset that is not part of this
    profile.
@@ -196,10 +196,15 @@ gh api "repos/$label_target/labels?per_page=100" --paginate --slurp \
 	--jq 'add | map({id, name, color, description}) | sort_by(.name)'
 ```
 
-Compare label names without regard to case. List each missing label to create
-and each matching label whose color or description differs. Preserve labels
-that exist only in the target repository. Include the source repository and
-the complete label diff in the plan required by the safety rules.
+Match the target label set to the source exactly. Compare names without regard
+to case when identifying existing labels. List missing labels to create,
+colors or descriptions to update, case-only renames, and target-only labels
+to delete. Include the source repository and the complete label diff in the
+plan required by the safety rules.
+
+Deleting a label also removes its issue and pull-request assignments. Inspect
+those assignments for every planned deletion and include affected items in
+the plan.
 
 If the reviewed label sets change before the copy, refresh the plan before
 applying it. After confirmation, copy the labels:
@@ -209,8 +214,19 @@ gh label clone "$label_source" --repo "$label_target" --force
 ```
 
 `--force` updates matching labels to the source colors and descriptions. The
-command preserves target-only labels and existing issue and pull-request
-assignments. See the [GitHub CLI label-copy reference](https://cli.github.com/manual/gh_label_clone).
+copy command leaves target-only labels in place. After the copy succeeds,
+apply any planned case-only renames with `gh label edit --name`. Then delete
+each target-only label listed in the confirmed plan:
+
+```sh
+label_name='label from the confirmed deletion list'
+label_path=$(jq -rn --arg name "$label_name" '$name | @uri')
+gh api --method DELETE "repos/$label_target/labels/$label_path"
+```
+
+Encode the label name as shown so spaces and other URL characters remain part
+of the label name. See the [GitHub CLI label-copy reference](https://cli.github.com/manual/gh_label_clone)
+and the [GitHub label API](https://docs.github.com/en/rest/issues/labels#delete-a-label).
 
 Repeat this step when you want to copy later source changes. Personal accounts
 have no shared label inheritance. Organization defaults apply only to new
@@ -236,11 +252,11 @@ enforcement state, and the effective rules on the default branch. Confirm that
 no duplicate rulesets were created and state which steps, if any, remain
 manual.
 
-Verify that every source label exists in the target with the same color and
-description. Ignore case when comparing names and hexadecimal colors. Check
-that every pre-existing label retains its ID and every target-only label
-retains its definition. Report the source repository, labels created, labels
-updated, target-only labels preserved, and any failures.
+Verify that the source and target have the same label names, colors, and
+descriptions, with no extra or missing labels. Ignore case only when comparing
+hexadecimal colors. Check that each retained label keeps its ID. Report the
+source repository, labels created, updated, renamed, or deleted, affected
+assignments, and any failures.
 
 For a label-only update, read back only the labels and report their results.
 
