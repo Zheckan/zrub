@@ -52,3 +52,8 @@ findings in the ledger below.
 - Manifest checkpoints follow payload writes. A failed checkpoint can leave an
   untracked created file or an outdated baseline; retries review adoption rather
   than assuming ownership. Earlier completed checkpoints survive later failures.
+- The pinned pnpm 11.15.1 rewrites the whole `pnpm-lock.yaml` into compact YAML
+  flow style whenever the lockfile changes, so `pnpm add`/`pnpm update` produce
+  a full-file reformat. To keep lockfile diffs minimal (as in the security
+  bumps), hand-edit only the affected entries in the existing style and verify
+  semantic equality against a pnpm-regenerated copy before committing.
