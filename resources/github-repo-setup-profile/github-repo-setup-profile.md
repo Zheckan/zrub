@@ -185,16 +185,40 @@ Apply the same existing-name check as in step 3.
 ## 5. Copy shared labels
 
 Use `Cenoir-Studios/.github` as this profile's label source. If the user names
-another source repository, use that repository instead. Read both label sets:
+another source repository, use that repository instead.
+
+The source holds 32 labels. The table lists them so a reader can tell what each
+label is for. Copy names, colors, and descriptions from the source, not from
+this table. If the two differ, the source is correct and this table needs an
+update.
+
+| Group             | Labels                                                                                                                                  |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Type              | `bug`, `enhancement`, `idea`, `documentation`, `performance`, `security`, `research`, `tech debt`, `epic`                               |
+| Planning          | `now`, `next`, `later`, `someday`                                                                                                       |
+| Triage            | `needs-triage`, `needs discussion`, `needs more info`, `accepted`, `already implemented`, `duplicate`, `wontfix`, `upstream`, `blocked` |
+| Pull requests     | `WIP`, `DO NOT MERGE`, `breaking`, `dependencies`                                                                                       |
+| Pull-request size | `size:XS`, `size:S`, `size:M`, `size:L`, `size:XL`, `size:XXL`                                                                          |
+
+The planning labels say when work happens, and they replace priority labels.
+Give an item at most one of them: `now` drops other work, `next` belongs to the
+next version, `later` is wanted but not for the next version, and `someday`
+has no plan. `wontfix` stays the label for work that will not happen.
+
+Read both label sets:
 
 ```sh
 label_source='Cenoir-Studios/.github'
 label_target='{owner}/{repo}'
-gh api "repos/$label_source/labels?per_page=100" --paginate --slurp \
-	--jq 'add | map({name, color, description}) | sort_by(.name)'
-gh api "repos/$label_target/labels?per_page=100" --paginate --slurp \
-	--jq 'add | map({id, name, color, description}) | sort_by(.name)'
+gh label list --repo "$label_source" --limit 200 \
+	--json name,color,description --jq 'sort_by(.name)'
+gh label list --repo "$label_target" --limit 200 \
+	--json id,name,color,description --jq 'sort_by(.name)'
 ```
+
+`gh api --paginate` does not accept `--slurp` together with `--jq`, so the
+commands use `gh label list`. Raise `--limit` if a repository has more than
+200 labels.
 
 Match the target label set to the source exactly. Compare names without regard
 to case when identifying existing labels. List missing labels to create,
@@ -243,8 +267,8 @@ gh api repos/{owner}/{repo} \
 gh api repos/{owner}/{repo}/rulesets --jq '.[] | {name, enforcement, target}'
 gh api repos/{owner}/{repo}/rules/branches/{branch} \
   --jq '.[] | {rule: .type, parameters: .parameters}'
-gh api 'repos/{owner}/{repo}/labels?per_page=100' --paginate --slurp \
-	--jq 'add | map({id, name, color, description}) | sort_by(.name)'
+gh label list --repo {owner}/{repo} --limit 200 \
+	--json id,name,color,description --jq 'sort_by(.name)'
 ```
 
 Report one table with the repository settings, each ruleset with its
