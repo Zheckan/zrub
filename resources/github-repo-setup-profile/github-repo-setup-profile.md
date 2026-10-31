@@ -2,9 +2,8 @@
 
 Use this runbook to apply this project's GitHub settings, branch protection,
 release-tag protection, and shared labels. For a new repository, follow the
-steps in order. For a label-only update, follow step 5 and the label
-verification in step 6. Keep other settings unchanged. Apply the safety rules
-to either path.
+steps in order. For a label-only update, follow step 5 and the label check in
+step 6, leave other settings unchanged, and still apply the safety rules.
 
 This is a one-off setup runbook. Read and follow it from its source without
 copying the document into the target project. It changes remote configuration
@@ -187,8 +186,7 @@ Apply the same existing-name check as in step 3.
 Use `Cenoir-Studios/.github` as this profile's label source. If the user names
 another source repository, use that repository instead.
 
-The source holds 32 labels. The table lists them so a reader can tell what each
-label is for. Copy names, colors, and descriptions from the source, not from
+The table groups the source labels. Copy names, colors, and descriptions from the source, not from
 this table. If the two differ, the source is correct and this table needs an
 update.
 
@@ -201,7 +199,7 @@ update.
 | Pull-request size | `size:XS`, `size:S`, `size:M`, `size:L`, `size:XL`, `size:XXL`                                                                          |
 
 The planning labels say when work happens, and they replace priority labels.
-Give an item at most one of them: `now` drops other work, `next` belongs to the
+Give an item at most one of them: `now` takes priority over other work, `next` belongs to the
 next version, `later` is wanted but not for the next version, and `someday`
 has no plan. `wontfix` stays the label for work that will not happen.
 
@@ -211,13 +209,13 @@ Read both label sets:
 label_source='Cenoir-Studios/.github'
 label_target='{owner}/{repo}'
 gh label list --repo "$label_source" --limit 200 \
-	--json name,color,description --jq 'sort_by(.name)'
+  --json name,color,description --jq 'sort_by(.name)'
 gh label list --repo "$label_target" --limit 200 \
-	--json id,name,color,description --jq 'sort_by(.name)'
+  --json id,name,color,description --jq 'sort_by(.name)'
 ```
 
-`gh api --paginate` does not accept `--slurp` together with `--jq`, so the
-commands use `gh label list`. Raise `--limit` if a repository has more than
+Use `gh label list`, because `gh api --paginate --slurp` cannot be combined
+with `--jq`. Raise `--limit` if a repository has more than
 200 labels.
 
 Match the target label set to the source exactly. Compare names without regard
@@ -228,10 +226,16 @@ plan required by the safety rules.
 
 Deleting a label also removes its issue and pull-request assignments. Inspect
 those assignments for every planned deletion and include affected items in
-the plan.
+the plan:
 
-If the reviewed label sets change before the copy, refresh the plan before
-applying it. After confirmation, copy the labels:
+```sh
+label_name='{label}'
+gh issue list --repo "$label_target" --label "$label_name" --state all
+gh pr list --repo "$label_target" --label "$label_name" --state all
+```
+
+Just before copying, read both label sets again. If either changed, refresh the
+plan and confirm again. After confirmation, copy the labels:
 
 ```sh
 gh label clone "$label_source" --repo "$label_target" --force
@@ -243,7 +247,7 @@ apply any planned case-only renames with `gh label edit --name`. Then delete
 each target-only label listed in the confirmed plan:
 
 ```sh
-label_name='label from the confirmed deletion list'
+label_name='{label}'
 label_path=$(jq -rn --arg name "$label_name" '$name | @uri')
 gh api --method DELETE "repos/$label_target/labels/$label_path"
 ```
@@ -252,9 +256,8 @@ Encode the label name as shown so spaces and other URL characters remain part
 of the label name. See the [GitHub CLI label-copy reference](https://cli.github.com/manual/gh_label_clone)
 and the [GitHub label API](https://docs.github.com/en/rest/issues/labels#delete-a-label).
 
-Repeat this step when you want to copy later source changes. Personal accounts
-have no shared label inheritance. Organization defaults apply only to new
-repositories and do not update existing repositories. See
+GitHub never syncs labels to existing repositories, so rerun this step to pick
+up source changes. See
 [organization default labels](https://docs.github.com/en/organizations/managing-organization-settings/managing-default-labels-for-repositories-in-your-organization).
 
 ## 6. Verify and report
@@ -268,7 +271,7 @@ gh api repos/{owner}/{repo}/rulesets --jq '.[] | {name, enforcement, target}'
 gh api repos/{owner}/{repo}/rules/branches/{branch} \
   --jq '.[] | {rule: .type, parameters: .parameters}'
 gh label list --repo {owner}/{repo} --limit 200 \
-	--json id,name,color,description --jq 'sort_by(.name)'
+  --json id,name,color,description --jq 'sort_by(.name)'
 ```
 
 Report one table with the repository settings, each ruleset with its
@@ -277,8 +280,8 @@ no duplicate rulesets were created and state which steps, if any, remain
 manual.
 
 Verify that the source and target have the same label names, colors, and
-descriptions, with no extra or missing labels. Ignore case only when comparing
-hexadecimal colors. Check that each retained label keeps its ID. Report the
+descriptions, with no extra or missing labels. Names must match the source
+exactly, including case. Colors may differ only in letter case. Check that each retained label keeps its ID. Report the
 source repository, labels created, updated, renamed, or deleted, affected
 assignments, and any failures.
 

@@ -75,9 +75,9 @@ and bunx.
 - **GitHub repository setup profile.**
   `read github-repo-setup-profile` returns a one-time agent runbook that
   applies this project's standard GitHub settings, the `main-protection`
-  branch ruleset, `release-tags` tag protection, and shared labels to a repository. It
-  changes remote configuration when an agent follows it. The guide can also be
-  installed at `docs/project-guides/github-repo-setup-profile.md`.
+  branch ruleset, `release-tags` tag protection, and shared labels to a
+  repository. It changes remote configuration when an agent follows it. The
+  guide can also be installed at `docs/project-guides/github-repo-setup-profile.md`.
 - **TypeScript CI setup.** `read typescript-ci-setup`
   includes complete GitHub Actions examples for separate checks and a shared
   job. Before selecting or changing the layout, the guide requires the agent
