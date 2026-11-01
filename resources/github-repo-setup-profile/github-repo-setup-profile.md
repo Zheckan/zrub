@@ -1,9 +1,9 @@
 # GitHub Repository Setup Profile
 
 Use this runbook to apply this project's GitHub settings, branch protection,
-release-tag protection, and shared labels. For a new repository, follow the
-steps in order. For a label-only update, follow step 5 and the label check in
-step 6, leave other settings unchanged, and still apply the safety rules.
+and shared labels. For a new repository, follow the steps in order. For a
+label-only update, follow step 4 and the label check in step 5, leave other
+settings unchanged, and still apply the safety rules.
 
 This is a one-off setup runbook. Read and follow it from its source without
 copying the document into the target project. It changes remote configuration
@@ -160,28 +160,7 @@ Notes:
 - Omit `copilot_code_review` when the account has no Copilot code review
   access.
 
-## 4. Release-tag ruleset `release-tags`
-
-Protect the `v*` tags used by npm releases:
-
-```sh
-gh api --method POST repos/{owner}/{repo}/rulesets --input - <<'EOF'
-{
-  "name": "release-tags",
-  "target": "tag",
-  "enforcement": "active",
-  "bypass_actors": [],
-  "conditions": {
-    "ref_name": { "include": ["refs/tags/v*"], "exclude": [] }
-  },
-  "rules": [{ "type": "deletion" }, { "type": "non_fast_forward" }]
-}
-EOF
-```
-
-Apply the same existing-name check as in step 3.
-
-## 5. Copy shared labels
+## 4. Copy shared labels
 
 Use `Cenoir-Studios/.github` as this profile's label source. If the user names
 another source repository, use that repository instead.
@@ -260,7 +239,7 @@ GitHub never syncs labels to existing repositories, so rerun this step to pick
 up source changes. See
 [organization default labels](https://docs.github.com/en/organizations/managing-organization-settings/managing-default-labels-for-repositories-in-your-organization).
 
-## 6. Verify and report
+## 5. Verify and report
 
 Read back the applied state:
 
@@ -287,7 +266,7 @@ assignments, and any failures.
 
 For a label-only update, read back only the labels and report their results.
 
-## 7. Settings without a public API (manual)
+## 6. Settings without a public API (manual)
 
 These stay unchanged and require the repository settings page:
 
@@ -297,7 +276,7 @@ These stay unchanged and require the repository settings page:
 - Automatically close issues linked to merged pull requests.
 - Do not include Git LFS objects in source archives.
 
-## 8. Out of scope
+## 7. Out of scope
 
 - Automated application of this profile through the CLI, including staged
   remote actions and a dedicated confirmation flow: deferred. See
