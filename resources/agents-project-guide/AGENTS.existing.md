@@ -12,5 +12,5 @@ install more guides.
 - Findings ledger: `docs/findings.md`. Read it before starting and record new
   findings there.
 - GitHub repository setup standard (repository settings, the
-  `main-protection` branch ruleset, and release-tag protection, with the exact
+  `main-protection` branch ruleset, and shared labels, with the exact
   `gh api` commands): https://github.com/Zheckan/zrub/blob/main/resources/github-repo-setup-profile/github-repo-setup-profile.md

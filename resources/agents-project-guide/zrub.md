@@ -35,7 +35,7 @@ self-service manual for maintaining the guides installed in this project.
   adopted files, and managed blocks are retained; forgetting their tracking
   requires an explicit selection and preserves their contents.
 - Re-apply the GitHub repository standard (settings, the `main-protection`
-  branch ruleset, `release-tags` protection): read and follow the one-off
+  branch ruleset, shared labels): read and follow the one-off
   runbook with `npx @zheckan/zrub@latest read github-repo-setup-profile` without
   copying it into the project. Source:
   https://github.com/Zheckan/zrub/blob/main/resources/github-repo-setup-profile/github-repo-setup-profile.md
